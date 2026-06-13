@@ -7,23 +7,35 @@ import Success from './pages/Success';
 function App() {
   const [step, setStep] = useState('phone'); // phone, otp, success
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [confirmationResult, setConfirmationResult] = useState(null);
+  const [error, setError] = useState('');
 
-  const handleSendOtp = (phone) => {
+  const handleSendOtp = (phone, result) => {
     setPhoneNumber(phone);
+    setConfirmationResult(result);
+    setError('');
     setStep('otp');
   };
 
   const handleVerify = () => {
     setStep('success');
+    setError('');
   };
 
   const handleBack = () => {
     setStep('phone');
+    setError('');
   };
 
   const handleReset = () => {
     setStep('phone');
     setPhoneNumber('');
+    setConfirmationResult(null);
+    setError('');
+  };
+
+  const handleError = (msg) => {
+    setError(msg);
   };
 
   return (
@@ -36,15 +48,23 @@ function App() {
 
       <AnimatePresence mode="wait">
         {step === 'phone' && (
-          <PhoneLogin key="phone" onSendOtp={handleSendOtp} />
+          <PhoneLogin 
+            key="phone" 
+            onSendOtp={handleSendOtp} 
+            onError={handleError}
+            error={error}
+          />
         )}
         
         {step === 'otp' && (
           <OtpVerify 
             key="otp" 
             phoneNumber={phoneNumber} 
+            confirmationResult={confirmationResult}
             onVerify={handleVerify} 
-            onBack={handleBack} 
+            onBack={handleBack}
+            onError={handleError}
+            error={error}
           />
         )}
 

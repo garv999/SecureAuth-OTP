@@ -5,18 +5,24 @@ import OtpInput from '../components/auth/OtpInput';
 import Timer from '../components/auth/Timer';
 import Button from '../components/common/Button';
 
-const OtpVerify = ({ phoneNumber, onVerify, onBack }) => {
+const OtpVerify = ({ phoneNumber, confirmationResult, onVerify, onBack, onError, error }) => {
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleVerify = () => {
-    if (otp.length === 6) {
+  const handleVerify = async () => {
+    if (otp.length === 6 && confirmationResult) {
       setLoading(true);
-      // Simulate API call
-      setTimeout(() => {
-        setLoading(false);
+      try {
+        await confirmationResult.confirm(otp);
         onVerify();
-      }, 1500);
+      } catch (err) {
+        console.error(err);
+        let message = 'Invalid OTP code. Please try again.';
+        if (err.code === 'auth/code-expired') message = 'OTP code expired. Please resend.';
+        onError(message);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -43,7 +49,10 @@ const OtpVerify = ({ phoneNumber, onVerify, onBack }) => {
       </div>
 
       <div className="space-y-8">
-        <OtpInput onComplete={setOtp} />
+        <div className="space-y-4">
+          <OtpInput onComplete={setOtp} />
+          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+        </div>
         
         <div className="space-y-4">
           <Button 
@@ -54,7 +63,7 @@ const OtpVerify = ({ phoneNumber, onVerify, onBack }) => {
             Verify & Continue
           </Button>
           
-          <Timer onResend={() => console.log('Resending OTP...')} />
+          <Timer onResend={() => onBack()} />
         </div>
       </div>
     </motion.div>
