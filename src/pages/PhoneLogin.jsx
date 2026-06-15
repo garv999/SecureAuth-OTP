@@ -8,6 +8,8 @@ import { useAuth } from '../hooks/useAuth';
 import PhoneInput from '../components/auth/PhoneInput';
 import Button from '../components/common/Button';
 
+import { Toaster, toast } from 'react-hot-toast';
+
 const PhoneLogin = () => {
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,7 +28,9 @@ const PhoneLogin = () => {
         'size': 'invisible',
         'callback': () => {},
         'expired-callback': () => {
-          setError('reCAPTCHA expired. Please try again.');
+          const msg = 'reCAPTCHA expired. Please try again.';
+          setError(msg);
+          toast.error(msg);
         }
       });
     }
@@ -50,6 +54,7 @@ const PhoneLogin = () => {
         const appVerifier = window.recaptchaVerifier;
         const result = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
         setConfirmationResult(result);
+        toast.success('OTP sent successfully!');
         // Navigate to verify page with only serializable phone number
         navigate('/verify', { state: { phoneNumber: formattedPhone } });
       } catch (err) {
@@ -59,6 +64,7 @@ const PhoneLogin = () => {
         if (err.code === 'auth/too-many-requests') message = 'Too many requests. Try again later.';
         if (err.code === 'auth/admin-restricted-operation') message = 'Phone authentication is not enabled.';
         setError(message);
+        toast.error(message);
       } finally {
         setLoading(false);
       }

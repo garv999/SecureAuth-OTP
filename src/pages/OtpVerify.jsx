@@ -7,6 +7,8 @@ import Timer from '../components/auth/Timer';
 import Button from '../components/common/Button';
 import { useAuth } from '../hooks/useAuth';
 
+import { toast } from 'react-hot-toast';
+
 const OtpVerify = () => {
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,12 +35,14 @@ const OtpVerify = () => {
       setError('');
       try {
         await confirmationResult.confirm(otp);
+        toast.success('Phone verified successfully!');
         navigate('/dashboard');
       } catch (err) {
         console.error(err);
         let message = 'Invalid OTP code. Please try again.';
         if (err.code === 'auth/code-expired') message = 'OTP code expired. Please resend.';
         setError(message);
+        toast.error(message);
       } finally {
         setLoading(false);
       }
