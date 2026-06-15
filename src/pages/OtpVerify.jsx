@@ -1,30 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { IoArrowBack } from 'react-icons/io5';
+import { useLocation, useNavigate } from 'react-router-dom';
 import OtpInput from '../components/auth/OtpInput';
 import Timer from '../components/auth/Timer';
 import Button from '../components/common/Button';
+import { useAuth } from '../hooks/useAuth';
 
-const OtpVerify = ({ phoneNumber, confirmationResult, onVerify, onBack, onError, error }) => {
+const OtpVerify = () => {
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { user, confirmationResult } = useAuth();
+  
+  const { phoneNumber } = location.state || {};
+
+  // Redirect if already logged in or if no confirmationResult (page refresh)
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    } else if (!confirmationResult) {
+      navigate('/login');
+    }
+  }, [user, confirmationResult, navigate]);
 
   const handleVerify = async () => {
     if (otp.length === 6 && confirmationResult) {
       setLoading(true);
+      setError('');
       try {
         await confirmationResult.confirm(otp);
-        onVerify();
+        navigate('/dashboard');
       } catch (err) {
         console.error(err);
         let message = 'Invalid OTP code. Please try again.';
         if (err.code === 'auth/code-expired') message = 'OTP code expired. Please resend.';
-        onError(message);
+        setError(message);
       } finally {
         setLoading(false);
       }
     }
   };
+
+  if (!confirmationResult) return null;
 
   return (
     <motion.div
@@ -34,7 +55,7 @@ const OtpVerify = ({ phoneNumber, confirmationResult, onVerify, onBack, onError,
       className="max-w-md w-full"
     >
       <button 
-        onClick={onBack}
+        onClick={() => navigate('/login')}
         className="flex items-center gap-2 text-slate-400 hover:text-white mb-8 transition-colors"
       >
         <IoArrowBack />
@@ -51,7 +72,7 @@ const OtpVerify = ({ phoneNumber, confirmationResult, onVerify, onBack, onError,
       <div className="space-y-8">
         <div className="space-y-4">
           <OtpInput onComplete={setOtp} />
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+          {error && <p className="text-red-500 text-sm text-center font-medium">{error}</p>}
         </div>
         
         <div className="space-y-4">
@@ -63,7 +84,7 @@ const OtpVerify = ({ phoneNumber, confirmationResult, onVerify, onBack, onError,
             Verify & Continue
           </Button>
           
-          <Timer onResend={() => onBack()} />
+          <Timer onResend={() => navigate('/login')} />
         </div>
       </div>
     </motion.div>

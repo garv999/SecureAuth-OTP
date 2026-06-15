@@ -2,50 +2,63 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BsShieldLock } from 'react-icons/bs';
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
 import { auth } from '../services/firebase';
+import { useAuth } from '../hooks/useAuth';
 import PhoneInput from '../components/auth/PhoneInput';
 import Button from '../components/common/Button';
 
-const PhoneLogin = ({ onSendOtp, onError, error }) => {
+const PhoneLogin = () => {
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const { user, setConfirmationResult } = useAuth();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) navigate('/dashboard');
+  }, [user, navigate]);
 
   useEffect(() => {
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-      'size': 'invisible',
-      'callback': (response) => {
-        // reCAPTCHA solved, allow signInWithPhoneNumber.
-      },
-      'expired-callback': () => {
-        onError('reCAPTCHA expired. Please try again.');
-      }
-    });
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible',
+        'callback': () => {},
+        'expired-callback': () => {
+          setError('reCAPTCHA expired. Please try again.');
+        }
+      });
+    }
 
     return () => {
       if (window.recaptchaVerifier) {
         window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
       }
     };
-  }, [onError]);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     if (phone.length === 10) {
       setLoading(true);
       const formattedPhone = `+91${phone}`;
       
       try {
         const appVerifier = window.recaptchaVerifier;
-        const confirmationResult = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
-        onSendOtp(formattedPhone, confirmationResult);
+        const result = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
+        setConfirmationResult(result);
+        // Navigate to verify page with only serializable phone number
+        navigate('/verify', { state: { phoneNumber: formattedPhone } });
       } catch (err) {
         console.error("Firebase Error:", err);
         let message = `Error (${err.code}): Failed to send OTP.`;
         if (err.code === 'auth/invalid-phone-number') message = 'Invalid phone number.';
         if (err.code === 'auth/too-many-requests') message = 'Too many requests. Try again later.';
-        if (err.code === 'auth/admin-restricted-operation') message = 'Phone authentication is not enabled in Firebase Console.';
-        if (err.code === 'auth/unauthorized-domain') message = 'This domain is not authorized in Firebase Console.';
-        onError(message);
+        if (err.code === 'auth/admin-restricted-operation') message = 'Phone authentication is not enabled.';
+        setError(message);
       } finally {
         setLoading(false);
       }
@@ -70,7 +83,7 @@ const PhoneLogin = ({ onSendOtp, onError, error }) => {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
           <PhoneInput value={phone} onChange={setPhone} />
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && <p className="text-red-500 text-sm text-center font-medium">{error}</p>}
         </div>
         <Button 
           type="submit" 
@@ -84,7 +97,7 @@ const PhoneLogin = ({ onSendOtp, onError, error }) => {
       <div id="recaptcha-container"></div>
 
       <p className="mt-8 text-center text-sm text-slate-500 px-4">
-        By continuing, you agree to our <span className="text-slate-400 underline">Terms of Service</span> and <span className="text-slate-400 underline">Privacy Policy</span>.
+        By continuing, you agree to our <span className="text-slate-400 underline cursor-pointer">Terms of Service</span> and <span className="text-slate-400 underline cursor-pointer">Privacy Policy</span>.
       </p>
     </motion.div>
   );
