@@ -19,7 +19,7 @@ const OtpVerify = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, confirmationResult } = useAuth();
-  const { addHistoryEvent } = useAppContext();
+  const { addHistoryEvent, createNewSession } = useAppContext();
   
   const { phoneNumber } = location.state || {};
 
@@ -38,6 +38,7 @@ const OtpVerify = () => {
       setError('');
       try {
         await confirmationResult.confirm(otp);
+        createNewSession();
         addHistoryEvent('login', `Authenticated with ${phoneNumber}`);
         toast.success('Phone verified successfully!');
         navigate('/dashboard');
@@ -71,17 +72,19 @@ const OtpVerify = () => {
       </button>
 
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Verify OTP</h1>
-        <p className="text-slate-400">
-          We sent a 6-digit code to <span className="text-white font-medium">{phoneNumber}</span>
+        <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-2">Verify OTP</h1>
+        <p className="text-[var(--text-secondary)]">
+          We sent a 6-digit code to <span className="text-[var(--text-primary)] font-medium">{phoneNumber}</span>
         </p>
       </div>
+
 
       <div className="space-y-8">
         <div className="space-y-4">
           <OtpInput onComplete={setOtp} />
           {error && <p className="text-red-500 text-sm text-center font-medium">{error}</p>}
         </div>
+
         
         <div className="space-y-4">
           <Button 

@@ -21,13 +21,13 @@ const Modal = ({ isOpen, onClose, title, children, footer }) => {
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-md bg-slate-900 border border-slate-700 rounded-[2rem] overflow-hidden shadow-2xl"
+          className="relative w-full max-w-md bg-[var(--bg-color)] border border-[var(--border-color)] rounded-[2rem] overflow-hidden shadow-2xl"
         >
-          <div className="flex items-center justify-between p-6 border-b border-slate-800">
-            <h2 className="text-xl font-bold text-white">{title}</h2>
+          <div className="flex items-center justify-between p-6 border-b border-[var(--border-color)]">
+            <h2 className="text-xl font-bold text-[var(--text-primary)]">{title}</h2>
             <button 
               onClick={onClose}
-              className="p-2 hover:bg-slate-800 rounded-full text-slate-400 hover:text-white transition-colors"
+              className="p-2 hover:bg-[var(--card-bg)] rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
             >
               <IoClose size={24} />
             </button>
@@ -38,11 +38,12 @@ const Modal = ({ isOpen, onClose, title, children, footer }) => {
           </div>
           
           {footer && (
-            <div className="flex items-center gap-4 p-6 bg-slate-800/50 border-t border-slate-800">
+            <div className="flex items-center gap-4 p-6 bg-[var(--card-bg)] border-t border-[var(--border-color)]">
               {footer}
             </div>
           )}
         </motion.div>
+
       </div>
     </AnimatePresence>
   );

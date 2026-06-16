@@ -82,8 +82,8 @@ const PhoneLogin = () => {
         <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-500/10 rounded-2xl mb-4">
           <BsShieldLock className="text-3xl text-blue-500" />
         </div>
-        <h1 className="text-3xl font-bold text-white mb-2">SecureAuth</h1>
-        <p className="text-slate-400">Enter your phone number to continue</p>
+        <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-2">SecureAuth Pro</h1>
+        <p className="text-[var(--text-secondary)]">Enter your phone number to continue</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -91,6 +91,7 @@ const PhoneLogin = () => {
           <PhoneInput value={phone} onChange={setPhone} />
           {error && <p className="text-red-500 text-sm text-center font-medium">{error}</p>}
         </div>
+
         <Button 
           type="submit" 
           isLoading={loading} 
@@ -102,10 +103,11 @@ const PhoneLogin = () => {
 
       <div id="recaptcha-container"></div>
 
-      <p className="mt-8 text-center text-sm text-slate-500 px-4">
-        By continuing, you agree to our <span className="text-slate-400 underline cursor-pointer">Terms of Service</span> and <span className="text-slate-400 underline cursor-pointer">Privacy Policy</span>.
+      <p className="mt-8 text-center text-sm text-[var(--text-secondary)] px-4">
+        By continuing, you agree to our <span className="text-[var(--text-primary)] underline cursor-pointer">Terms</span> and <span className="text-[var(--text-primary)] underline cursor-pointer">Privacy</span>.
       </p>
     </motion.div>
+
   );
 };
 

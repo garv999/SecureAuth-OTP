@@ -77,11 +77,11 @@ const Dashboard = () => {
     >
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-4xl font-bold text-white tracking-tight mb-2">System Overview</h1>
-          <p className="text-slate-400 font-medium">Real-time authentication analytics and account status.</p>
+          <h1 className="text-4xl font-bold text-[var(--text-primary)] tracking-tight mb-2">System Overview</h1>
+          <p className="text-[var(--text-secondary)] font-medium">Real-time authentication analytics and account status.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" onClick={() => exportReport('txt')} className="!w-auto px-6">
+          <Button variant="outline" onClick={() => exportReport('txt')} className="!w-auto px-6 border-[var(--border-color)] text-[var(--text-primary)] hover:bg-[var(--card-bg)]">
             <BsDownload className="mr-2" /> Export TXT
           </Button>
           <Button variant="primary" onClick={() => exportReport('json')} className="!w-auto px-6">
@@ -92,15 +92,16 @@ const Dashboard = () => {
 
       {/* Global Search */}
       <div className="relative group max-w-md">
-        <BsSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors" />
+        <BsSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--accent-blue)] transition-colors" />
         <input 
           type="text" 
           placeholder="Filter dashboard information..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full bg-slate-900/50 border border-slate-700 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-blue-500 transition-all"
+          className="w-full bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl py-4 pl-12 pr-4 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent-blue)] transition-all"
         />
       </div>
+
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -110,13 +111,13 @@ const Dashboard = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="p-6 bg-slate-900/50 border border-slate-700 rounded-3xl"
+            className="p-6 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-3xl"
           >
-            <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center mb-4 text-xl">
+            <div className="w-10 h-10 rounded-xl bg-[var(--bg-color)] flex items-center justify-center mb-4 text-xl border border-[var(--border-color)]">
               {stat.icon}
             </div>
-            <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">{stat.label}</p>
-            <p className="text-2xl font-bold text-white">{stat.value}</p>
+            <p className="text-[var(--text-secondary)] text-xs font-bold uppercase tracking-widest mb-1">{stat.label}</p>
+            <p className="text-2xl font-bold text-[var(--text-primary)]">{stat.value}</p>
           </motion.div>
         ))}
       </div>
@@ -127,19 +128,19 @@ const Dashboard = () => {
           <motion.div 
             key={card.id}
             whileHover={{ y: -5 }}
-            className="p-6 bg-slate-800/50 border border-slate-700 rounded-[2rem] flex items-center gap-6"
+            className="p-6 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-[2rem] flex items-center gap-6"
           >
             <div className="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500 text-2xl">
               {card.icon}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mb-1">{card.label}</p>
+              <p className="text-xs text-[var(--text-secondary)] font-bold uppercase tracking-widest mb-1">{card.label}</p>
               <div className="flex items-center gap-3">
-                <p className="text-white font-semibold truncate">{card.value}</p>
+                <p className="text-[var(--text-primary)] font-semibold truncate">{card.value}</p>
                 {card.copy && (
                   <button 
                     onClick={() => copyToClipboard(card.value)}
-                    className="p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors"
+                    className="p-2 hover:bg-[var(--bg-color)] rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors border border-transparent hover:border-[var(--border-color)]"
                   >
                     {copied ? <BsCheck2All className="text-green-500" /> : <BsCopy size={16} />}
                   </button>
@@ -149,6 +150,7 @@ const Dashboard = () => {
           </motion.div>
         ))}
       </div>
+
     </motion.div>
   );
 };

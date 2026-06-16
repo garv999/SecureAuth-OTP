@@ -2,29 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
+[data-theme='light'] {
+  --bg-color: #f8fafc;
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --border-color: rgba(226, 232, 240, 0.9);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --accent-blue: #2563eb;
+  --sidebar-bg: #ffffff;
+}
+
 :root {
   --bg-color: #0f172a;
   --card-bg: rgba(30, 41, 59, 0.5);
   --border-color: rgba(51, 65, 85, 0.5);
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-blue: #3b82f6;
+  --sidebar-bg: rgba(15, 23, 42, 0.5);
 }
 
 [data-theme='midnight'] {
   --bg-color: #000000;
   --card-bg: rgba(23, 23, 23, 0.7);
   --border-color: rgba(38, 38, 38, 0.8);
+  --text-primary: #ffffff;
+  --text-secondary: #a3a3a3;
+  --text-muted: #525252;
+  --accent-blue: #3b82f6;
+  --sidebar-bg: rgba(0, 0, 0, 0.7);
 }
 
-[data-theme='ocean'] {
-  --bg-color: #021d30;
-  --card-bg: rgba(1, 42, 74, 0.6);
-  --border-color: rgba(1, 58, 99, 0.7);
-}
 
 body {
   margin: 0;
   background-color: var(--bg-color);
-  color: white;
+  color: var(--text-primary);
   min-height: 100vh;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
+
 

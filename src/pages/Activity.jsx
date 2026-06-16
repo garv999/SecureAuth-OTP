@@ -12,6 +12,8 @@ const Activity = () => {
       case 'login': return <BsBoxArrowInRight className="text-emerald-500" />;
       case 'logout': return <BsBoxArrowRight className="text-red-500" />;
       case 'session_restore': return <BsArrowRepeat className="text-blue-500" />;
+      case 'session_expiry': return <BsXLg className="text-amber-500" />;
+      case 'session_extended': return <BsShieldCheck className="text-blue-400" />;
       default: return <BsArrowRepeat />;
     }
   };
@@ -21,7 +23,9 @@ const Activity = () => {
       case 'login': return 'Logged In';
       case 'logout': return 'Logged Out';
       case 'session_restore': return 'Session Restored';
-      default: return type;
+      case 'session_expiry': return 'Session Expired';
+      case 'session_extended': return 'Session Extended';
+      default: return type.replace(/_/g, ' ').toUpperCase();
     }
   };
 
@@ -33,18 +37,19 @@ const Activity = () => {
     >
       <div className="flex items-center justify-between mb-10">
         <div>
-          <h1 className="text-4xl font-bold text-white tracking-tight mb-2">Login Activity</h1>
-          <p className="text-slate-400 font-medium">Historical timeline of your recent sessions.</p>
+          <h1 className="text-4xl font-bold text-[var(--text-primary)] tracking-tight mb-2">Login Activity</h1>
+          <p className="text-[var(--text-secondary)] font-medium">Historical timeline of your recent sessions.</p>
         </div>
-        <Button variant="outline" onClick={clearHistory} className="!w-auto px-6 text-red-500 border-red-500/30 hover:bg-red-500/10">
+        <Button variant="outline" onClick={clearHistory} className="!w-auto px-6 text-red-500 border-red-500/30 hover:bg-red-500/10 transition-colors">
           Clear Logs
         </Button>
       </div>
 
-      <div className="space-y-6 relative before:absolute before:left-[21px] before:top-4 before:bottom-4 before:w-[2px] before:bg-slate-800">
+
+      <div className="space-y-6 relative before:absolute before:left-[21px] before:top-4 before:bottom-4 before:w-[2px] before:bg-[var(--border-color)]">
         {history.length === 0 ? (
-          <div className="p-12 text-center bg-slate-900/50 border border-slate-800 rounded-3xl">
-            <p className="text-slate-500 italic font-medium">No activity logs found.</p>
+          <div className="p-12 text-center bg-[var(--card-bg)] border border-[var(--border-color)] rounded-3xl">
+            <p className="text-[var(--text-secondary)] italic font-medium">No activity logs found.</p>
           </div>
         ) : (
           history.map((event, i) => (
@@ -55,22 +60,23 @@ const Activity = () => {
               transition={{ delay: i * 0.05 }}
               className="flex gap-6 relative z-10"
             >
-              <div className="w-11 h-11 bg-slate-900 border border-slate-700 rounded-full flex items-center justify-center text-xl shrink-0">
+              <div className="w-11 h-11 bg-[var(--bg-color)] border border-[var(--border-color)] rounded-full flex items-center justify-center text-xl shrink-0">
                 {getIcon(event.type)}
               </div>
-              <div className="flex-1 p-5 bg-slate-900/50 border border-slate-700 rounded-2xl">
+              <div className="flex-1 p-5 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-                  <span className="font-bold text-white text-lg">{getLabel(event.type)}</span>
-                  <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+                  <span className="font-bold text-[var(--text-primary)] text-lg">{getLabel(event.type)}</span>
+                  <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">
                     {new Date(event.timestamp).toLocaleString()}
                   </span>
                 </div>
-                <p className="text-slate-400 text-sm font-medium">{event.details || 'Success authentication via Phone OTP.'}</p>
+                <p className="text-[var(--text-secondary)] text-sm font-medium">{event.details || 'Success authentication via Phone OTP.'}</p>
               </div>
             </motion.div>
           ))
         )}
       </div>
+
     </motion.div>
   );
 };

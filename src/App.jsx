@@ -25,14 +25,7 @@ const ProtectedRoute = ({ children }) => {
 // Animated Routes Wrapper
 const AnimatedRoutes = () => {
   const location = useLocation();
-  const { user, loading } = useAuth();
-  const { addHistoryEvent } = useAppContext();
-
-  useEffect(() => {
-    if (!loading && user) {
-      addHistoryEvent('session_restore', `Restored session for ${user.phoneNumber}`);
-    }
-  }, [loading]); // Only on mount/load
+  const { loading } = useAuth();
 
   if (loading) return <DashboardSkeleton />;
 
@@ -59,23 +52,25 @@ const AnimatedRoutes = () => {
   );
 };
 
+
 function App() {
   return (
     <AuthProvider>
       <AppProvider>
         <Router>
-          <div className="min-h-screen w-full transition-colors duration-300">
+          <div className="min-h-screen w-full transition-colors duration-300 bg-[var(--bg-color)] text-[var(--text-primary)]">
             <Toaster 
               position="top-right"
               toastOptions={{
                 duration: 4000,
                 style: {
-                  background: '#1e293b',
-                  color: '#fff',
-                  border: '1px solid #334155',
+                  background: 'var(--card-bg)',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border-color)',
                   borderRadius: '16px',
                   padding: '12px 20px',
-                  fontWeight: '500'
+                  fontWeight: '500',
+                  backdropFilter: 'blur(10px)'
                 },
               }}
             />
@@ -86,5 +81,6 @@ function App() {
     </AuthProvider>
   );
 }
+
 
 export default App;

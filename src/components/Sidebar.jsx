@@ -45,13 +45,14 @@ const Sidebar = () => {
   };
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full py-8 px-6 bg-slate-900/50 backdrop-blur-2xl border-r border-slate-800/50">
+    <div className="flex flex-col h-full py-8 px-6 bg-[var(--sidebar-bg)] backdrop-blur-2xl border-r border-[var(--border-color)]">
       <div className="flex items-center gap-3 mb-12 px-2">
         <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
           <BsShieldLock size={24} />
         </div>
-        <span className="text-xl font-bold tracking-tight text-white">SecureAuth<span className="text-blue-500 italic">Pro</span></span>
+        <span className="text-xl font-bold tracking-tight text-[var(--text-primary)]">SecureAuth<span className="text-blue-500 italic">Pro</span></span>
       </div>
+
 
       <nav className="flex-1 space-y-2">
         {links.map(link => (
@@ -63,7 +64,7 @@ const Sidebar = () => {
               flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-200 group
               ${isActive 
                 ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' 
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--card-bg)]'
               }
             `}
           >
@@ -75,11 +76,12 @@ const Sidebar = () => {
 
       <button
         onClick={() => setIsLogoutModalOpen(true)}
-        className="flex items-center gap-4 px-4 py-3.5 rounded-2xl text-slate-400 hover:text-red-400 hover:bg-red-400/10 transition-all duration-200 mt-auto"
+        className="flex items-center gap-4 px-4 py-3.5 rounded-2xl text-[var(--text-secondary)] hover:text-red-400 hover:bg-red-400/10 transition-all duration-200 mt-auto"
       >
         <BsBoxArrowRight size={20} />
         <span className="font-semibold tracking-wide">Logout</span>
       </button>
+
 
       <Modal
         isOpen={isLogoutModalOpen}

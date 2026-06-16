@@ -10,7 +10,7 @@ const Settings = () => {
   const themes = [
     { id: 'dark', label: 'Dark Default', color: 'bg-[#0f172a]' },
     { id: 'midnight', label: 'Midnight Black', color: 'bg-black' },
-    { id: 'ocean', label: 'Ocean Blue', color: 'bg-[#021d30]' },
+    { id: 'light', label: 'Light Professional', color: 'bg-white' },
   ];
 
   const toggleSetting = (key) => {
@@ -28,16 +28,16 @@ const Settings = () => {
       className="max-w-4xl"
     >
       <div className="mb-10">
-        <h1 className="text-4xl font-bold text-white tracking-tight mb-2">Preferences</h1>
-        <p className="text-slate-400 font-medium">Customize your SecureAuth Pro experience.</p>
+        <h1 className="text-4xl font-bold text-[var(--text-primary)] tracking-tight mb-2">Preferences</h1>
+        <p className="text-[var(--text-secondary)] font-medium">Customize your SecureAuth Pro experience.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         {/* Theme Selection */}
         <div className="space-y-6">
           <div className="flex items-center gap-3 px-2">
-            <BsPalette className="text-blue-500 text-xl" />
-            <h2 className="text-xl font-bold text-white">Interface Theme</h2>
+            <BsPalette className="text-[var(--accent-blue)] text-xl" />
+            <h2 className="text-xl font-bold text-[var(--text-primary)]">Interface Theme</h2>
           </div>
           <div className="space-y-3">
             {themes.map(t => (
@@ -47,12 +47,12 @@ const Settings = () => {
                 className={`w-full p-5 rounded-3xl border-2 flex items-center justify-between transition-all ${
                   theme === t.id 
                     ? 'border-blue-500 bg-blue-500/10' 
-                    : 'border-slate-800 bg-slate-900/40 hover:border-slate-700'
+                    : 'border-[var(--border-color)] bg-[var(--card-bg)] hover:border-[var(--text-muted)]'
                 }`}
               >
                 <div className="flex items-center gap-4">
-                  <div className={`w-8 h-8 rounded-full border border-slate-700 ${t.color}`} />
-                  <span className={`font-bold ${theme === t.id ? 'text-white' : 'text-slate-400'}`}>{t.label}</span>
+                  <div className={`w-8 h-8 rounded-full border border-[var(--border-color)] ${t.color}`} />
+                  <span className={`font-bold ${theme === t.id ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>{t.label}</span>
                 </div>
                 {theme === t.id && <div className="w-2 h-2 bg-blue-500 rounded-full" />}
               </button>
@@ -64,7 +64,7 @@ const Settings = () => {
         <div className="space-y-6">
           <div className="flex items-center gap-3 px-2">
             <BsLightning className="text-amber-500 text-xl" />
-            <h2 className="text-xl font-bold text-white">App Features</h2>
+            <h2 className="text-xl font-bold text-[var(--text-primary)]">App Features</h2>
           </div>
           <div className="space-y-4">
             {[
@@ -74,15 +74,15 @@ const Settings = () => {
             ].map(item => (
               <div 
                 key={item.id}
-                className="p-6 bg-slate-900/40 border border-slate-800 rounded-3xl flex items-center justify-between"
+                className="p-6 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-3xl flex items-center justify-between"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-slate-400">
+                  <div className="w-10 h-10 bg-[var(--bg-color)] border border-[var(--border-color)] rounded-xl flex items-center justify-center text-[var(--text-muted)]">
                     {item.icon}
                   </div>
                   <div>
-                    <p className="font-bold text-white">{item.label}</p>
-                    <p className="text-xs text-slate-500 font-medium">{item.desc}</p>
+                    <p className="font-bold text-[var(--text-primary)]">{item.label}</p>
+                    <p className="text-xs text-[var(--text-muted)] font-medium">{item.desc}</p>
                   </div>
                 </div>
                 <button
@@ -101,6 +101,7 @@ const Settings = () => {
         </div>
       </div>
     </motion.div>
+
   );
 };
 
