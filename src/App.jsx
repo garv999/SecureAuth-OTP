@@ -2,8 +2,9 @@ import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
-import { AuthProvider, useAuth } from './hooks/useAuth';
-import { AppProvider } from './hooks/useAppContext';
+import { useAuth } from './hooks/useAuth';
+import { AuthProvider } from './context/AuthProvider';
+import { AppProvider } from './context/AppProvider';
 import ErrorBoundary from './components/ErrorBoundary';
 import DashboardSkeleton from './components/common/DashboardSkeleton';
 

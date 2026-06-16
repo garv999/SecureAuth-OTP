@@ -1,6 +1,8 @@
 // src/utils/featureFlags.js
+import { features } from '../config/productionConfig';
+
 export const featureFlags = {
-  isMonitoringEnabled: import.meta.env.VITE_ENABLE_MONITORING === 'true',
-  isAnalyticsEnabled: import.meta.env.VITE_ENABLE_ANALYTICS === 'true',
-  isExperimentalEnabled: import.meta.env.VITE_ENABLE_EXPERIMENTAL_FEATURES === 'true',
+  isMonitoringEnabled: features.monitoring,
+  isAnalyticsEnabled: features.analytics,
+  isExperimentalEnabled: features.experimental,
 };

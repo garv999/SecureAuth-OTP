@@ -25,7 +25,7 @@ export const runHealthCheck = () => {
     const testKey = '__sa_health_test__';
     localStorage.setItem(testKey, 'ok');
     localStorage.removeItem(testKey);
-  } catch (e) {
+  } catch {
     issues.push('Local Storage is unavailable or restricted.');
   }
 
