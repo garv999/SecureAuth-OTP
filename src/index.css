@@ -3,14 +3,28 @@
 @tailwind utilities;
 
 :root {
-  background-color: #0f172a;
-  color: white;
+  --bg-color: #0f172a;
+  --card-bg: rgba(30, 41, 59, 0.5);
+  --border-color: rgba(51, 65, 85, 0.5);
+}
+
+[data-theme='midnight'] {
+  --bg-color: #000000;
+  --card-bg: rgba(23, 23, 23, 0.7);
+  --border-color: rgba(38, 38, 38, 0.8);
+}
+
+[data-theme='ocean'] {
+  --bg-color: #021d30;
+  --card-bg: rgba(1, 42, 74, 0.6);
+  --border-color: rgba(1, 58, 99, 0.7);
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
+  background-color: var(--bg-color);
+  color: white;
   min-height: 100vh;
+  transition: background-color 0.3s ease;
 }
+

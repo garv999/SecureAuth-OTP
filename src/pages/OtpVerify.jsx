@@ -9,6 +9,8 @@ import { useAuth } from '../hooks/useAuth';
 
 import { toast } from 'react-hot-toast';
 
+import { useAppContext } from '../hooks/useAppContext';
+
 const OtpVerify = () => {
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,6 +19,7 @@ const OtpVerify = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, confirmationResult } = useAuth();
+  const { addHistoryEvent } = useAppContext();
   
   const { phoneNumber } = location.state || {};
 
@@ -35,6 +38,7 @@ const OtpVerify = () => {
       setError('');
       try {
         await confirmationResult.confirm(otp);
+        addHistoryEvent('login', `Authenticated with ${phoneNumber}`);
         toast.success('Phone verified successfully!');
         navigate('/dashboard');
       } catch (err) {

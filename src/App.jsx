@@ -3,19 +3,21 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import { AnimatePresence } from 'framer-motion';
 import { Toaster, toast } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './hooks/useAuth';
+import { AppProvider, useAppContext } from './hooks/useAppContext';
 import PhoneLogin from './pages/PhoneLogin';
 import OtpVerify from './pages/OtpVerify';
 import Dashboard from './pages/Dashboard';
+import Profile from './pages/Profile';
+import Security from './pages/Security';
+import Activity from './pages/Activity';
+import Settings from './pages/Settings';
+import Layout from './components/Layout';
 import DashboardSkeleton from './components/common/DashboardSkeleton';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  
-  if (loading) {
-    return <DashboardSkeleton />;
-  }
-  
+  if (loading) return <DashboardSkeleton />;
   if (!user) return <Navigate to="/login" replace />;
   return children;
 };
@@ -24,37 +26,32 @@ const ProtectedRoute = ({ children }) => {
 const AnimatedRoutes = () => {
   const location = useLocation();
   const { user, loading } = useAuth();
+  const { addHistoryEvent } = useAppContext();
 
-  // Show "Session Restored" toast if user is found after loading
   useEffect(() => {
     if (!loading && user) {
-      toast.success('Secure session restored', {
-        id: 'session-restored',
-        style: {
-          borderRadius: '10px',
-          background: '#1e293b',
-          color: '#fff',
-          border: '1px solid #334155'
-        },
-      });
+      addHistoryEvent('session_restore', `Restored session for ${user.phoneNumber}`);
     }
-  }, [loading, user]);
+  }, [loading]); // Only on mount/load
 
   if (loading) return <DashboardSkeleton />;
 
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
+        {/* Public Routes */}
         <Route path="/login" element={<PhoneLogin />} />
         <Route path="/verify" element={<OtpVerify />} />
-        <Route 
-          path="/dashboard" 
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } 
-        />
+        
+        {/* Private Routes with Layout */}
+        <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/security" element={<Security />} />
+          <Route path="/activity" element={<Activity />} />
+          <Route path="/settings" element={<Settings />} />
+        </Route>
+
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
@@ -65,29 +62,27 @@ const AnimatedRoutes = () => {
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <div className="min-h-screen w-full bg-[#0f172a] flex items-center justify-center p-4">
-          <Toaster 
-            position="top-center"
-            toastOptions={{
-              duration: 4000,
-              style: {
-                background: '#1e293b',
-                color: '#fff',
-                border: '1px solid #334155',
-              },
-            }}
-          />
-          
-          {/* Background decoration */}
-          <div className="fixed inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/10 blur-[120px] rounded-full" />
+      <AppProvider>
+        <Router>
+          <div className="min-h-screen w-full transition-colors duration-300">
+            <Toaster 
+              position="top-right"
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  background: '#1e293b',
+                  color: '#fff',
+                  border: '1px solid #334155',
+                  borderRadius: '16px',
+                  padding: '12px 20px',
+                  fontWeight: '500'
+                },
+              }}
+            />
+            <AnimatedRoutes />
           </div>
-
-          <AnimatedRoutes />
-        </div>
-      </Router>
+        </Router>
+      </AppProvider>
     </AuthProvider>
   );
 }
