@@ -1,6 +1,5 @@
-import React from 'react';
 import { motion } from 'framer-motion';
-import { BsPerson, BsPhone, BsFingerprint, BsCalendarEvent, BsClock, BsShieldCheck } from 'react-icons/bs';
+import { BsPhone, BsFingerprint, BsCalendarEvent, BsClock, BsShieldCheck } from 'react-icons/bs';
 import { useAuth } from '../hooks/useAuth';
 
 const Profile = () => {

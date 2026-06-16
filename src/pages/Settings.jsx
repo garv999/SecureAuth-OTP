@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { BsPalette, BsBell, BsLightning, BsClipboardCheck } from 'react-icons/bs';
 import { useAppContext } from '../hooks/useAppContext';

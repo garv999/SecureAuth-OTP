@@ -1,5 +1,3 @@
-import React from 'react';
-
 const DashboardSkeleton = () => {
   return (
     <div className="max-w-md w-full animate-pulse">

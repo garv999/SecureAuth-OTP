@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BsGrid, 
@@ -11,40 +11,9 @@ import {
   BsList,
   BsXLg
 } from 'react-icons/bs';
-import { toast } from 'react-hot-toast';
-import { useAuth } from '../hooks/useAuth';
-import Modal from './Modal';
-import Button from './common/Button';
 
-import { useAppContext } from '../hooks/useAppContext';
-
-const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const { logout, user } = useAuth();
-  const { addHistoryEvent } = useAppContext();
-  const navigate = useNavigate();
-
-  const links = [
-    { to: '/dashboard', label: 'Dashboard', icon: <BsGrid /> },
-    { to: '/profile', label: 'Profile', icon: <BsPerson /> },
-    { to: '/security', label: 'Security', icon: <BsShieldLock /> },
-    { to: '/activity', label: 'Activity', icon: <BsClockHistory /> },
-    { to: '/settings', label: 'Settings', icon: <BsGear /> },
-  ];
-
-  const handleLogout = async () => {
-    try {
-      addHistoryEvent('logout', `User ${user?.phoneNumber} ended session.`);
-      await logout();
-      toast.success('Logged out successfully');
-      navigate('/login');
-    } catch (err) {
-      toast.error('Logout failed');
-    }
-  };
-
-  const SidebarContent = () => (
+const SidebarContent = ({ links, setIsOpen, setIsLogoutModalOpen }) => {
+  return (
     <div className="flex flex-col h-full py-8 px-6 bg-[var(--sidebar-bg)] backdrop-blur-2xl border-r border-[var(--border-color)]">
       <div className="flex items-center gap-3 mb-12 px-2">
         <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
@@ -75,29 +44,29 @@ const Sidebar = () => {
       </nav>
 
       <button
-        onClick={() => setIsLogoutModalOpen(true)}
+        onClick={() => {
+          setIsLogoutModalOpen(true);
+          setIsOpen(false);
+        }}
         className="flex items-center gap-4 px-4 py-3.5 rounded-2xl text-[var(--text-secondary)] hover:text-red-400 hover:bg-red-400/10 transition-all duration-200 mt-auto"
       >
         <BsBoxArrowRight size={20} />
         <span className="font-semibold tracking-wide">Logout</span>
       </button>
-
-
-      <Modal
-        isOpen={isLogoutModalOpen}
-        onClose={() => setIsLogoutModalOpen(false)}
-        title="Confirm Logout"
-        footer={
-          <>
-            <Button variant="outline" onClick={() => setIsLogoutModalOpen(false)}>Cancel</Button>
-            <Button variant="primary" onClick={handleLogout} className="bg-red-600 hover:bg-red-700">Logout</Button>
-          </>
-        }
-      >
-        <p className="text-slate-400">Are you sure you want to end your current secure session?</p>
-      </Modal>
     </div>
   );
+};
+
+const Sidebar = ({ setIsLogoutModalOpen }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const links = [
+    { to: '/dashboard', label: 'Dashboard', icon: <BsGrid /> },
+    { to: '/profile', label: 'Profile', icon: <BsPerson /> },
+    { to: '/security', label: 'Security', icon: <BsShieldLock /> },
+    { to: '/activity', label: 'Activity', icon: <BsClockHistory /> },
+    { to: '/settings', label: 'Settings', icon: <BsGear /> },
+  ];
 
   return (
     <>
@@ -136,7 +105,11 @@ const Sidebar = () => {
               >
                 <BsXLg />
               </button>
-              <SidebarContent />
+              <SidebarContent 
+                links={links}
+                setIsOpen={setIsOpen}
+                setIsLogoutModalOpen={setIsLogoutModalOpen}
+              />
             </motion.div>
           </>
         )}
@@ -144,7 +117,11 @@ const Sidebar = () => {
 
       {/* Desktop Sidebar */}
       <aside className="hidden lg:block w-72 h-screen sticky top-0">
-        <SidebarContent />
+        <SidebarContent 
+          links={links}
+          setIsOpen={setIsOpen}
+          setIsLogoutModalOpen={setIsLogoutModalOpen}
+        />
       </aside>
     </>
   );

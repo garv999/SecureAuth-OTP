@@ -1,4 +1,3 @@
-import React from 'react';
 import { BsPhone } from 'react-icons/bs';
 
 const PhoneInput = ({ value, onChange, countryCode = '+91' }) => {

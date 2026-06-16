@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 const OtpInput = ({ length = 6, onComplete }) => {
   const [otp, setOtp] = useState(new Array(length).fill(""));
@@ -51,7 +51,7 @@ const OtpInput = ({ length = 6, onComplete }) => {
   };
 
   return (
-    <div className="flex justify-between gap-2 sm:gap-4">
+    <div className="flex justify-center gap-3 sm:gap-4 w-full">
       {otp.map((digit, index) => (
         <input
           key={index}
@@ -61,7 +61,19 @@ const OtpInput = ({ length = 6, onComplete }) => {
           onChange={(e) => handleChange(index, e.target.value)}
           onKeyDown={(e) => handleKeyDown(index, e)}
           onPaste={handlePaste}
-          className="w-12 h-14 sm:w-14 sm:h-16 bg-[var(--card-bg)] border-2 border-[var(--border-color)] rounded-xl text-center text-2xl font-bold text-[var(--text-primary)] focus:border-blue-500 focus:outline-none transition-all shadow-inner"
+          inputMode="numeric"
+          pattern="\d*"
+          maxLength={1}
+          className={`
+            w-12 h-14 sm:w-16 sm:h-20 
+            bg-[var(--bg-color)] border-2 border-[var(--border-color)] 
+            rounded-2xl text-center text-3xl font-bold text-[var(--text-primary)] 
+            focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 
+            focus:outline-none transition-all duration-300 
+            shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]
+            placeholder:text-[var(--text-muted)]
+          `}
+          aria-label={`Digit ${index + 1}`}
         />
       ))}
     </div>
