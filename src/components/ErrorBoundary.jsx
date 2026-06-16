@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import { BsExclamationTriangle } from 'react-icons/bs';
 import Button from './common/Button';
+import { monitoring } from '../utils/monitoring';
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -18,7 +19,7 @@ class ErrorBoundary extends Component {
       errorInfo: errorInfo,
       timestamp: new Date().toISOString()
     });
-    console.error("Uncaught error:", error, errorInfo);
+    monitoring.captureException(error, { errorInfo });
   }
 
   handleReload = () => {
