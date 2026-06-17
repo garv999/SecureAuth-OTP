@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BsShieldLock } from 'react-icons/bs';
-import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
+import { FcGoogle } from 'react-icons/fc';
+import { RecaptchaVerifier } from 'firebase/auth';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { auth } from '../services/firebase';
 import { useAuth } from '../hooks/useAuth';
@@ -13,10 +14,11 @@ import { toast } from 'react-hot-toast';
 const PhoneLogin = () => {
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, setConfirmationResult } = useAuth();
+  const { user, loginWithPhone, loginWithGoogle } = useAuth();
 
   // Redirect if already logged in
   useEffect(() => {
@@ -28,24 +30,65 @@ const PhoneLogin = () => {
 
   useEffect(() => {
     if (!window.recaptchaVerifier) {
+      console.log("[LOGIN STEP 1] RecaptchaVerifier initialization");
+      console.log("[STEP new RecaptchaVerifier ENTER]");
       window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
         'size': 'invisible',
-        'callback': () => {},
+        'callback': (response) => {
+          console.log("[LOGIN STEP 2] Recaptcha verified/rendered", response);
+        },
         'expired-callback': () => {
           const msg = 'reCAPTCHA expired. Please try again.';
+          console.error("[LOGIN ERROR] reCAPTCHA expired");
           setError(msg);
           toast.error(msg);
         }
       });
+      console.log("[STEP new RecaptchaVerifier EXIT]");
+      console.log("[LOGIN] RecaptchaVerifier instance created:", window.recaptchaVerifier);
     }
 
     return () => {
       if (window.recaptchaVerifier) {
-        window.recaptchaVerifier.clear();
-        window.recaptchaVerifier = null;
+        console.log("[LOGIN] Cleanup triggered. Verifier state:", window.recaptchaVerifier ? "Present" : "Null");
+        // [PHASE 20.4 DIAGNOSIS] Temporarily disabling clear() to verify lifecycle hypothesis
+        // console.log("[LOGIN] Clearing RecaptchaVerifier");
+        // window.recaptchaVerifier.clear();
+        // window.recaptchaVerifier = null;
       }
     };
   }, []);
+
+  const handleGoogleLogin = async () => {
+    setGoogleLoading(true);
+    setError('');
+    try {
+      await loginWithGoogle();
+      toast.success('Successfully signed in with Google!');
+      const from = location.state?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
+    } catch (error) {
+      console.group("FULL PHONE AUTH ERROR");
+      console.log("RAW ERROR:", error);
+      console.log("TYPE:", typeof error);
+      console.log("INSTANCEOF ERROR:", error instanceof Error);
+      console.log("CODE:", error?.code);
+      console.log("MESSAGE:", error?.message);
+      console.log("NAME:", error?.name);
+      console.log("STACK:", error?.stack);
+      console.log("STRINGIFIED:");
+      try {
+        console.log(JSON.stringify(error, null, 2));
+      } catch {
+        console.log("Unable to stringify");
+      }
+      console.groupEnd();
+      console.error("Google Login Error:", error);
+      // Error handled in AuthProvider/Toast
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,20 +103,44 @@ const PhoneLogin = () => {
     if (phone.length === 10) {
       setLoading(true);
       const formattedPhone = `+91${phone}`;
+      console.log("[LOGIN STEP 3] signInWithPhoneNumber called for:", formattedPhone);
+      console.log("[LOGIN] Firebase Config Check:", {
+        projectId: auth.app.options.projectId,
+        apiKey: auth.app.options.apiKey?.substring(0, 5) + "...",
+        authDomain: auth.app.options.authDomain
+      });
       
       try {
         const appVerifier = window.recaptchaVerifier;
-        const result = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
-        setConfirmationResult(result);
+        await loginWithPhone(formattedPhone, appVerifier);
+        console.log("[LOGIN STEP 4] confirmationResult received (via AuthProvider state)");
+        console.log("[LOGIN STEP 5] OTP sent successfully");
         toast.success('OTP sent successfully!');
         // Navigate to verify page with only serializable phone number and destination
         navigate('/verify', { state: { phoneNumber: formattedPhone, from: location.state?.from } });
-      } catch (err) {
-        console.error("Firebase Error:", err);
-        let message = `Error (${err.code}): Failed to send OTP.`;
-        if (err.code === 'auth/invalid-phone-number') message = 'Invalid phone number.';
-        if (err.code === 'auth/too-many-requests') message = 'Too many requests. Try again later.';
-        if (err.code === 'auth/admin-restricted-operation') message = 'Phone authentication is not enabled.';
+      } catch (error) {
+        console.group("FULL PHONE AUTH ERROR");
+        console.log("RAW ERROR:", error);
+        console.log("TYPE:", typeof error);
+        console.log("INSTANCEOF ERROR:", error instanceof Error);
+        console.log("CODE:", error?.code);
+        console.log("MESSAGE:", error?.message);
+        console.log("NAME:", error?.name);
+        console.log("STACK:", error?.stack);
+        console.log("STRINGIFIED:");
+        try {
+          console.log(JSON.stringify(error, null, 2));
+        } catch {
+          console.log("Unable to stringify");
+        }
+        console.groupEnd();
+
+        console.error("PHONE AUTH ERROR (LOGIN)", error);
+        
+        let message = `Error (${error.code}): Failed to send OTP.`;
+        if (error.code === 'auth/invalid-phone-number') message = 'Invalid phone number.';
+        if (error.code === 'auth/too-many-requests') message = 'Too many requests. Try again later.';
+        if (error.code === 'auth/admin-restricted-operation') message = 'Phone authentication is not enabled.';
         setError(message);
         toast.error(message);
       } finally {
@@ -111,32 +178,50 @@ const PhoneLogin = () => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="space-y-3">
-            <label className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-[0.2em] ml-1">
-              Authorized Phone Number
-            </label>
-            <PhoneInput value={phone} onChange={setPhone} />
-            {error && (
-              <motion.p 
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-red-500 text-sm text-center font-bold bg-red-500/10 py-3 rounded-xl border border-red-500/20"
-              >
-                {error}
-              </motion.p>
-            )}
+        <div className="space-y-6">
+          <Button 
+            variant="outline"
+            onClick={handleGoogleLogin}
+            isLoading={googleLoading}
+            className="w-full h-14 text-lg border-[var(--border-color)] bg-[var(--bg-color)] hover:bg-[var(--card-bg)] text-[var(--text-primary)] flex items-center justify-center gap-3 shadow-sm"
+          >
+            {!googleLoading && <FcGoogle className="text-2xl" />}
+            Continue with Google
+          </Button>
+
+          <div className="relative flex items-center gap-4 py-2">
+            <div className="flex-1 h-[1px] bg-[var(--border-color)]"></div>
+            <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-[0.2em]">OR</span>
+            <div className="flex-1 h-[1px] bg-[var(--border-color)]"></div>
           </div>
 
-          <Button 
-            type="submit" 
-            isLoading={loading} 
-            disabled={phone.length !== 10}
-            className="h-14 text-lg shadow-blue-500/25"
-          >
-            Request Access OTP
-          </Button>
-        </form>
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="space-y-3">
+              <label className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-[0.2em] ml-1">
+                Authorized Phone Number
+              </label>
+              <PhoneInput value={phone} onChange={setPhone} />
+              {error && (
+                <motion.p 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-red-500 text-sm text-center font-bold bg-red-500/10 py-3 rounded-xl border border-red-500/20"
+                >
+                  {error}
+                </motion.p>
+              )}
+            </div>
+
+            <Button 
+              type="submit" 
+              isLoading={loading} 
+              disabled={phone.length !== 10}
+              className="h-14 text-lg shadow-blue-500/25"
+            >
+              Request Access OTP
+            </Button>
+          </form>
+        </div>
 
         <div id="recaptcha-container" className="mt-4"></div>
 

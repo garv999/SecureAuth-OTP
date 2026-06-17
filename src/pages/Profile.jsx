@@ -1,16 +1,22 @@
 import { motion } from 'framer-motion';
-import { BsPhone, BsFingerprint, BsCalendarEvent, BsClock, BsShieldCheck } from 'react-icons/bs';
+import { BsPhone, BsFingerprint, BsCalendarEvent, BsClock, BsShieldCheck, BsEnvelope } from 'react-icons/bs';
+import { FcGoogle } from 'react-icons/fc';
 import { useAuth } from '../hooks/useAuth';
 
 const Profile = () => {
   const { user } = useAuth();
+  const isGoogle = user.providerData[0]?.providerId === 'google.com';
 
   const details = [
-    { label: 'Phone Number', value: user.phoneNumber, icon: <BsPhone className="text-blue-500" /> },
+    { 
+      label: isGoogle ? 'Email Address' : 'Phone Number', 
+      value: isGoogle ? user.email : user.phoneNumber, 
+      icon: isGoogle ? <BsEnvelope className="text-blue-500" /> : <BsPhone className="text-blue-500" /> 
+    },
     { label: 'User ID', value: user.uid, icon: <BsFingerprint className="text-indigo-500" /> },
     { label: 'Account Created', value: new Date(user.metadata.creationTime).toLocaleString(), icon: <BsCalendarEvent className="text-emerald-500" /> },
     { label: 'Last Login', value: new Date(user.metadata.lastSignInTime).toLocaleString(), icon: <BsClock className="text-amber-500" /> },
-    { label: 'Provider', value: 'Phone Auth', icon: <BsShieldCheck className="text-cyan-500" /> },
+    { label: 'Provider', value: isGoogle ? 'Google' : 'Phone Auth', icon: isGoogle ? <FcGoogle className="text-xl" /> : <BsShieldCheck className="text-cyan-500" /> },
     { label: 'Status', value: 'Verified', icon: <BsShieldCheck className="text-green-500" /> },
   ];
 
@@ -21,12 +27,24 @@ const Profile = () => {
       className="max-w-4xl"
     >
       <div className="flex items-center gap-6 mb-10">
-        <div className="w-24 h-24 bg-blue-600 rounded-3xl flex items-center justify-center text-white text-4xl font-bold shadow-2xl shadow-blue-500/20">
-          {user.phoneNumber.slice(-2)}
-        </div>
+        {isGoogle && user.photoURL ? (
+          <img 
+            src={user.photoURL} 
+            alt={user.displayName} 
+            className="w-24 h-24 rounded-3xl shadow-2xl shadow-blue-500/20 object-cover border-2 border-blue-600/20"
+          />
+        ) : (
+          <div className="w-24 h-24 bg-blue-600 rounded-3xl flex items-center justify-center text-white text-4xl font-bold shadow-2xl shadow-blue-500/20">
+            {isGoogle ? user.displayName?.charAt(0) : user.phoneNumber?.slice(-2)}
+          </div>
+        )}
         <div>
-          <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-1">User Profile</h1>
-          <p className="text-[var(--text-secondary)] font-medium">{user.phoneNumber}</p>
+          <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-1">
+            {isGoogle ? user.displayName : 'User Profile'}
+          </h1>
+          <p className="text-[var(--text-secondary)] font-medium">
+            {isGoogle ? user.email : user.phoneNumber}
+          </p>
         </div>
       </div>
 

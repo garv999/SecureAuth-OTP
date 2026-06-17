@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { firebaseConfig } from "../config/productionConfig";
 
 const requiredEnvVars = [
@@ -20,3 +20,4 @@ if (missingVars.length > 0) {
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();

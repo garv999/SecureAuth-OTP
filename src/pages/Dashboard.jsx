@@ -15,6 +15,7 @@ import {
   BsArrowDownRight,
   BsDash
 } from 'react-icons/bs';
+import { FcGoogle } from 'react-icons/fc';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
 import { useAppContext } from '../hooks/useAppContext';
@@ -23,7 +24,7 @@ import EmptyState from '../components/common/EmptyState';
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const { history, analytics } = useAppContext();
+  const { history, analytics, securityScore } = useAppContext();
   const [copied, setCopied] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -35,19 +36,24 @@ const Dashboard = () => {
   }, []);
 
   const exportReport = useCallback((format) => {
+    const provider = user.providerData[0]?.providerId === 'google.com' ? 'Google' : 'Phone Auth';
+    const identifier = user.providerData[0]?.providerId === 'google.com' ? user.email : user.phoneNumber;
+
     const data = {
       user: {
         uid: user.uid,
-        phone: user.phoneNumber,
+        provider,
+        identifier,
         lastLogin: user.metadata.lastSignInTime,
-        created: user.metadata.creationTime
+        created: user.metadata.creationTime,
+        securityScore
       },
       analytics
     };
 
     const content = format === 'json' 
       ? JSON.stringify(data, null, 2)
-      : `SecureAuth Pro - User Report\n\nUID: ${user.uid}\nPhone: ${user.phoneNumber}\nTotal Logins: ${analytics.totalLogins}`;
+      : `SecureAuth Pro - User Report\n\nUID: ${user.uid}\nProvider: ${provider}\nIdentifier: ${identifier}\nSecurity Score: ${securityScore}%\nTotal Logins: ${analytics.totalLogins}`;
 
     const blob = new Blob([content], { type: format === 'json' ? 'application/json' : 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -56,7 +62,7 @@ const Dashboard = () => {
     a.download = `secureauth-report-${Date.now()}.${format}`;
     a.click();
     toast.success(`Report exported as ${format.toUpperCase()}`);
-  }, [user, analytics]);
+  }, [user, analytics, securityScore]);
 
   const formatDuration = (ms) => {
     if (!ms) return '0m';
@@ -66,21 +72,26 @@ const Dashboard = () => {
   };
 
   const stats = useMemo(() => [
+    { label: 'Security Score', value: `${securityScore}%`, icon: <BsShieldCheck className={securityScore > 80 ? 'text-emerald-500' : 'text-amber-500'} />, trend: securityScore > 80 ? 'up' : 'neutral' },
     { label: 'Total Logins', value: analytics.totalLogins, icon: <BsCalendarCheck className="text-blue-500" />, trend: 'up' },
     { label: 'Active Sessions', value: analytics.currentActiveSessions, icon: <BsShieldCheck className="text-emerald-500" />, trend: 'neutral' },
     { label: 'Avg. Duration', value: formatDuration(analytics.avgSessionDuration), icon: <BsClockHistory className="text-amber-500" />, trend: 'neutral' },
     { label: 'Max Duration', value: formatDuration(analytics.longestSession), icon: <BsClockHistory className="text-purple-500" />, trend: 'up' },
     { label: 'Unique Devices', value: analytics.totalDevicesUsed, icon: <BsLaptop className="text-indigo-500" />, trend: 'neutral' },
-    { label: 'Logout Events', value: analytics.totalLogouts, icon: <BsArrowUpRight className="text-red-500" />, trend: 'down' },
-  ], [analytics]);
+  ], [analytics, securityScore]);
 
-  const infoCards = useMemo(() => [
-    { label: 'Verified Phone', value: user.phoneNumber, icon: <BsPhone />, id: 'phone' },
-    { label: 'User Unique ID', value: user.uid, icon: <BsFingerprint />, id: 'uid', copy: true },
-  ].filter(card => 
-    card.label.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    card.value.toLowerCase().includes(searchTerm.toLowerCase())
-  ), [user, searchTerm]);
+  const infoCards = useMemo(() => {
+    const provider = user.providerData[0]?.providerId === 'google.com' ? 'Google' : 'Phone Auth';
+    const mainIdentifier = user.providerData[0]?.providerId === 'google.com' ? user.email : user.phoneNumber;
+    
+    return [
+      { label: `Verified ${provider}`, value: mainIdentifier, icon: provider === 'Google' ? <FcGoogle /> : <BsPhone />, id: 'provider' },
+      { label: 'User Unique ID', value: user.uid, icon: <BsFingerprint />, id: 'uid', copy: true },
+    ].filter(card => 
+      card.label.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      card.value?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [user, searchTerm]);
 
   if (history.length === 0) {
     return (

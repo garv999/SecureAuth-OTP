@@ -94,6 +94,7 @@ export const AppProvider = ({ children }) => {
   const createNewSession = useCallback(() => {
     const fingerprint = getSessionFingerprint();
     const existingSession = sessions.find(s => s.stableId === fingerprint.stableId);
+    const isKnownDevice = existingSession || trustedDevices.includes(fingerprint.stableId);
 
     if (existingSession) {
       const sid = existingSession.sessionId;
@@ -116,10 +117,16 @@ export const AppProvider = ({ children }) => {
       setCurrentSessionId(sid);
       sessionStorage.setItem('sa_current_sid', sid);
       setSessions(prev => [newSession, ...prev].slice(0, 10));
-      addHistoryEvent('session_created', `New device authorized: ${fingerprint.sessionName}`);
+      
+      if (!isKnownDevice) {
+        addHistoryEvent('security_alert', `New unrecognized device detected: ${fingerprint.sessionName}`);
+        if (settings.toasts) toast.error('Security Alert: Unrecognized device detected', { duration: 6000 });
+      } else {
+        addHistoryEvent('session_created', `New device authorized: ${fingerprint.sessionName}`);
+      }
       return sid;
     }
-  }, [sessions, addHistoryEvent]);
+  }, [sessions, trustedDevices, addHistoryEvent, settings.toasts]);
 
   const toggleTrustDevice = useCallback((stableId) => {
     setTrustedDevices(prev => {
@@ -129,13 +136,63 @@ export const AppProvider = ({ children }) => {
       if (settings.toasts) {
         toast.success(isTrusted ? 'Device trust removed' : 'Device marked as trusted');
       }
+      addHistoryEvent(isTrusted ? 'trust_removed' : 'trust_added', `Device trust status updated for ${stableId.substring(0, 8)}`);
       return next;
     });
-  }, [settings.toasts]);
+  }, [settings.toasts, addHistoryEvent]);
+
+  // Enhanced Security Score
+  const securityScore = useMemo(() => {
+    if (!user) return 0;
+    
+    let score = 0;
+    
+    // 1. Providers (Max 25)
+    const providerCount = user.providerData.length;
+    score += providerCount >= 2 ? 25 : 15;
+    
+    // 2. Trusted Devices (Max 25)
+    const hasTrusted = trustedDevices.length > 0;
+    score += hasTrusted ? 25 : 5;
+    
+    // 3. Active Sessions (Max 25)
+    if (sessions.length === 1) score += 25;
+    else if (sessions.length <= 3) score += 15;
+    else if (sessions.length <= 6) score += 5;
+    
+    // 4. Security Health (Max 25)
+    const now = new Date().getTime();
+    const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000;
+    const recentAlerts = history.filter(e => 
+      e.type === 'security_alert' && new Date(e.timestamp).getTime() > oneWeekAgo
+    );
+    score += Math.max(0, 25 - (recentAlerts.length * 10));
+    
+    return score;
+  }, [user, sessions, trustedDevices, history]);
+
+  // Security Specific Notifications
+  const securityNotifications = useMemo(() => {
+    const securityTypes = [
+      'security_alert', 
+      'trust_added', 
+      'trust_removed', 
+      'google_login', 
+      'phone_login', 
+      'session_terminated',
+      'other_sessions_terminated',
+      'provider_linked',
+      'provider_unlinked'
+    ];
+    return history.filter(e => securityTypes.includes(e.type)).slice(0, 20);
+  }, [history]);
+
+  // Use the calculated values to satisfy lint and provide to context
+  const securityContextValues = { securityScore, securityNotifications };
 
   // Enterprise Analytics
   const analytics = useMemo(() => {
-    const loginEvents = history.filter(e => e.type === 'login' || e.type === 'session_restore');
+    const loginEvents = history.filter(e => e.type === 'login' || e.type === 'session_restore' || e.type === 'google_login' || e.type === 'phone_login');
     const logoutEvents = history.filter(e => e.type === 'logout' || e.type === 'session_expiry' || e.type === 'session_terminated');
     
     let totalDuration = 0;
@@ -183,6 +240,9 @@ export const AppProvider = ({ children }) => {
       isInitialized.current = true;
       
       const fingerprint = getSessionFingerprint();
+      const provider = user.providerData[0]?.providerId === 'google.com' ? 'Google' : 'Phone Auth';
+      const eventType = user.providerData[0]?.providerId === 'google.com' ? 'google_login' : 'phone_login';
+      const identifier = user.providerData[0]?.providerId === 'google.com' ? user.email : user.phoneNumber;
 
       if (currentSessionId) {
         // Log restoration asynchronously to avoid cascading render warnings
@@ -195,7 +255,8 @@ export const AppProvider = ({ children }) => {
         // Create new session asynchronously
         const timer = setTimeout(() => {
           createNewSession();
-          if (settings.toasts) toast.success('New session initialized');
+          addHistoryEvent(eventType, `Authenticated with ${provider} (${identifier})`);
+          if (settings.toasts) toast.success(`New ${provider} session initialized`);
         }, 0);
         return () => clearTimeout(timer);
       }
@@ -259,7 +320,8 @@ export const AppProvider = ({ children }) => {
       showSessionWarning, setShowSessionWarning,
       extendSession,
       trustedDevices, toggleTrustDevice,
-      analytics
+      analytics,
+      ...securityContextValues
     }}>
       {children}
     </AppContext.Provider>
