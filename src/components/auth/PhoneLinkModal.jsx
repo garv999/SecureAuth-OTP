@@ -25,6 +25,10 @@ const PhoneLinkModal = ({ isOpen, onClose }) => {
   const recaptchaContainerRef = useRef(null);
 
   useEffect(() => {
+    if (isOpen) {
+      console.log("[AUTH SCREEN MOUNT] PhoneLinkModal");
+    }
+    
     if (isOpen && recaptchaContainerRef.current) {
       console.log("[LINK STEP 1] RecaptchaVerifier initialization");
       console.log("[LINK] Container element:", recaptchaContainerRef.current);
@@ -47,12 +51,15 @@ const PhoneLinkModal = ({ isOpen, onClose }) => {
     }
 
     return () => {
+      if (isOpen) {
+        console.log("[AUTH SCREEN UNMOUNT] PhoneLinkModal");
+      }
       if (recaptchaRef.current) {
-        console.log("[LINK] Cleanup triggered. Verifier state:", recaptchaRef.current ? "Present" : "Null");
-        // [PHASE 20.4 DIAGNOSIS] Temporarily disabling clear() to verify lifecycle hypothesis
-        // console.log("[LINK] Clearing Recaptcha instance");
-        // recaptchaRef.current.clear();
-        // recaptchaRef.current = null;
+        console.log("[LINK] Cleanup triggered. Verifier state: Present");
+        // Re-enabling clear() now that route-level unmounts are prevented
+        console.log("[LINK] Clearing Recaptcha instance");
+        recaptchaRef.current.clear();
+        recaptchaRef.current = null;
       }
     };
   }, [isOpen]);

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BsShieldLock, 
@@ -42,6 +42,11 @@ const Security = () => {
     securityNotifications,
     addHistoryEvent
   } = useAppContext();
+
+  useEffect(() => {
+    console.log("[AUTH SCREEN MOUNT] Security");
+    return () => console.log("[AUTH SCREEN UNMOUNT] Security");
+  }, []);
 
   const { 
     user, 

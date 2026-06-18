@@ -29,6 +29,7 @@ const PhoneLogin = () => {
   }, [user, navigate, location]);
 
   useEffect(() => {
+    console.log("[AUTH SCREEN MOUNT] PhoneLogin");
     if (!window.recaptchaVerifier) {
       console.log("[LOGIN STEP 1] RecaptchaVerifier initialization");
       console.log("[STEP new RecaptchaVerifier ENTER]");
@@ -49,12 +50,13 @@ const PhoneLogin = () => {
     }
 
     return () => {
+      console.log("[AUTH SCREEN UNMOUNT] PhoneLogin");
       if (window.recaptchaVerifier) {
-        console.log("[LOGIN] Cleanup triggered. Verifier state:", window.recaptchaVerifier ? "Present" : "Null");
-        // [PHASE 20.4 DIAGNOSIS] Temporarily disabling clear() to verify lifecycle hypothesis
-        // console.log("[LOGIN] Clearing RecaptchaVerifier");
-        // window.recaptchaVerifier.clear();
-        // window.recaptchaVerifier = null;
+        console.log("[LOGIN] Cleanup triggered. Verifier state: Present");
+        // Re-enabling clear() now that route-level unmounts are prevented
+        console.log("[LOGIN] Clearing RecaptchaVerifier");
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
       }
     };
   }, []);

@@ -20,6 +20,11 @@ const OtpVerify = () => {
   
   const { phoneNumber, from } = location.state || {};
 
+  useEffect(() => {
+    console.log("[AUTH SCREEN MOUNT] OtpVerify");
+    return () => console.log("[AUTH SCREEN UNMOUNT] OtpVerify");
+  }, []);
+
   // Redirect if already logged in or if no confirmationResult (page refresh)
   useEffect(() => {
     if (user) {

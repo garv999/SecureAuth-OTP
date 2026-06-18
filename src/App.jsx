@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
@@ -32,9 +32,12 @@ const PageLoader = () => (
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, status } = useAuth();
   const location = useLocation();
-  if (loading) return <DashboardSkeleton />;
+  
+  // Only block with skeleton during initial app load
+  if (loading && status === 'IDLE') return <DashboardSkeleton />;
+  
   if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
   return children;
 };
@@ -42,9 +45,15 @@ const ProtectedRoute = ({ children }) => {
 // Animated Routes Wrapper
 const AnimatedRoutes = () => {
   const location = useLocation();
-  const { loading } = useAuth();
+  const { loading, status } = useAuth();
 
-  if (loading) return <DashboardSkeleton />;
+  useEffect(() => {
+    console.log(`[GLOBAL LOADING CHANGED] loading: ${loading}, status: ${status}`);
+  }, [loading, status]);
+
+  // Only block with skeleton during initial app load
+  // Prevents unmounting of auth screens during signInWithPhoneNumber/verifyOtp
+  if (loading && status === 'IDLE') return <DashboardSkeleton />;
 
   return (
     <Suspense fallback={<PageLoader />}>
