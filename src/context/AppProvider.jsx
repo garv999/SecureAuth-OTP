@@ -23,13 +23,6 @@ export const AppProvider = ({ children }) => {
   const [history, setHistory] = useState(() => JSON.parse(localStorage.getItem('sa_history')) || []);
   const [sessions, setSessions] = useState(() => JSON.parse(localStorage.getItem('sa_sessions')) || []);
   const [trustedDevices, setTrustedDevices] = useState(() => JSON.parse(localStorage.getItem('sa_trusted_devices')) || []);
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
-  
-  const setSessionsLogged = (newSessions) => {
-    log("[SET SESSIONS]", newSessions?.length || 0);
-    setSessions(newSessions);
-  };
-  
   // Session initialization (Production-safe pattern)
   const [currentSessionId, setCurrentSessionId] = useState(() => {
     const sid = sessionStorage.getItem('sa_current_sid');
