@@ -6,10 +6,12 @@ import {
   updateDoc, 
   collection,
   getDocs,
-  addDoc
+  addDoc,
+  deleteDoc
 } from 'firebase/firestore';
+import { app } from './firebase';
 
-const db = getFirestore();
+const db = getFirestore(app);
 
 export const getUserDoc = async (uid) => {
   return await getDoc(doc(db, 'users', uid));
@@ -40,4 +42,8 @@ export const addUserSubcollectionDoc = async (uid, collectionName, data) => {
 
 export const setUserDoc = async (uid, path, data) => {
   await setDoc(doc(db, 'users', uid, ...path), data);
+};
+
+export const deleteUserDoc = async (uid, path) => {
+  await deleteDoc(doc(db, 'users', uid, ...path));
 };

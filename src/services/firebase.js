@@ -18,6 +18,6 @@ if (missingVars.length > 0) {
   console.error(`[SecureAuth Pro] Missing required Firebase configuration: ${missingVars.join(', ')}. Please check your .env file.`);
 }
 
-const app = initializeApp(firebaseConfig);
+export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();

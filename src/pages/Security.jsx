@@ -67,11 +67,14 @@ const Security = () => {
     "Monitor security notifications for any unrecognized login attempts."
   ], []);
 
-  const sortedSessions = useMemo(() => [...sessions].sort((a, b) => {
-    if (a.sessionId === currentSessionId) return -1;
-    if (b.sessionId === currentSessionId) return 1;
-    return new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime();
-  }), [sessions, currentSessionId]);
+  const sortedSessions = useMemo(() => {
+    if (!sessions) return [];
+    return [...sessions].sort((a, b) => {
+      if (a.sessionId === currentSessionId) return -1;
+      if (b.sessionId === currentSessionId) return 1;
+      return new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime();
+    });
+  }, [sessions, currentSessionId]);
 
   const providers = useMemo(() => {
     const data = user?.providerData || [];
@@ -130,6 +133,14 @@ const Security = () => {
     if (os.includes('Android')) return <BsAndroid2 />;
     return <BsCpu />;
   };
+
+  if (sessions === null) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--accent-blue)]"></div>
+      </div>
+    );
+  }
 
   if (sessions.length === 0) {
     return (

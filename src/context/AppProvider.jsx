@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 import { getSessionFingerprint } from '../utils/session';
 import { INACTIVITY_LIMIT, WARNING_THRESHOLD } from '../constants/session';
 import { AppContext } from './AppContext';
+import { getUserSubcollection, setUserDoc, deleteUserDoc } from '../services/firestore';
 
 export const AppProvider = ({ children }) => {
   const { user, loading, logout } = useAuth();
@@ -21,8 +22,11 @@ export const AppProvider = ({ children }) => {
   // History and Theme initialization
   const [theme, setTheme] = useState(() => localStorage.getItem('sa_theme') || 'dark');
   const [history, setHistory] = useState(() => JSON.parse(localStorage.getItem('sa_history')) || []);
-  const [sessions, setSessions] = useState(() => JSON.parse(localStorage.getItem('sa_sessions')) || []);
+  const [sessions, setSessions] = useState(null);
   const [trustedDevices, setTrustedDevices] = useState(() => JSON.parse(localStorage.getItem('sa_trusted_devices')) || []);
+
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
+  
   // Session initialization (Production-safe pattern)
   const [currentSessionId, setCurrentSessionId] = useState(() => {
     const sid = sessionStorage.getItem('sa_current_sid');
@@ -30,8 +34,8 @@ export const AppProvider = ({ children }) => {
     
     // Attempt session restoration from localStorage fingerprint
     const fingerprint = getSessionFingerprint();
-    const savedSessions = JSON.parse(localStorage.getItem('sa_sessions') || '[]');
-    const existing = savedSessions.find(s => s.stableId === fingerprint.stableId);
+    const savedSessions = JSON.parse(localStorage.getItem('sa_sessions') || '[]') || [];
+    const existing = Array.isArray(savedSessions) ? savedSessions.find(s => s.stableId === fingerprint.stableId) : null;
     
     if (existing) {
       const globalLastActivity = parseInt(localStorage.getItem('sa_last_activity') || '0', 10);
@@ -71,8 +75,15 @@ export const AppProvider = ({ children }) => {
   }, [addHistoryEvent]);
 
   const terminateSession = useCallback(async (sid) => {
+    if (!Array.isArray(sessions)) return;
     const sessionToTerm = sessions.find(s => s.sessionId === sid);
-    setSessions(prev => prev.filter(s => s.sessionId !== sid));
+    setSessions(prev => Array.isArray(prev) ? prev.filter(s => s.sessionId !== sid) : prev);
+    
+    if (user) {
+      deleteUserDoc(user.uid, ['sessions', sid]).catch(err => {
+        console.error("Failed to delete session from Firestore", err);
+      });
+    }
     
     if (sid === currentSessionId) {
       addHistoryEvent('session_terminated', `Current session (${sessionToTerm?.sessionName}) ended.`);
@@ -82,15 +93,28 @@ export const AppProvider = ({ children }) => {
       addHistoryEvent('session_terminated', `Remote device (${sessionToTerm?.sessionName}) revoked.`);
       if (settings.toasts) toast.success('Session terminated');
     }
-  }, [sessions, currentSessionId, logout, addHistoryEvent, settings.toasts]);
+  }, [sessions, currentSessionId, logout, addHistoryEvent, settings.toasts, user]);
 
   const logoutAllOtherSessions = useCallback(() => {
-    setSessions(prev => prev.filter(s => s.sessionId === currentSessionId));
+    if (!Array.isArray(sessions)) return;
+    const sessionsToTerm = sessions.filter(s => s.sessionId !== currentSessionId);
+    setSessions(prev => Array.isArray(prev) ? prev.filter(s => s.sessionId === currentSessionId) : prev);
+    
+    if (user) {
+      sessionsToTerm.forEach(s => {
+        deleteUserDoc(user.uid, ['sessions', s.sessionId]).catch(err => {
+          console.error("Failed to delete other session from Firestore", err);
+        });
+      });
+    }
+
     addHistoryEvent('other_sessions_terminated', 'All other active sessions cleared.');
     if (settings.toasts) toast.success('Other sessions cleared');
-  }, [currentSessionId, addHistoryEvent, settings.toasts]);
+  }, [sessions, currentSessionId, addHistoryEvent, settings.toasts, user]);
 
   const createNewSession = useCallback(() => {
+    if (!isDataLoaded || !Array.isArray(sessions)) return null;
+
     const fingerprint = getSessionFingerprint();
     const existingSession = sessions.find(s => s.stableId === fingerprint.stableId);
     const isKnownDevice = existingSession || trustedDevices.includes(fingerprint.stableId);
@@ -99,11 +123,20 @@ export const AppProvider = ({ children }) => {
       const sid = existingSession.sessionId;
       setCurrentSessionId(sid);
       sessionStorage.setItem('sa_current_sid', sid);
-      setSessions(prev => [
-        { ...existingSession, lastActivity: new Date().toISOString(), loginTimestamp: new Date().toISOString() },
-        ...prev.filter(s => s.sessionId !== sid)
-      ].slice(0, 10));
+      const updatedSession = { ...existingSession, lastActivity: new Date().toISOString(), loginTimestamp: new Date().toISOString() };
+      setSessions(prev => {
+        if (!Array.isArray(prev)) return prev;
+        return [
+          updatedSession,
+          ...prev.filter(s => s.sessionId !== sid)
+        ].slice(0, 10);
+      });
       addHistoryEvent('login', `Logged In from ${fingerprint.sessionName}`);
+      if (user) {
+        setUserDoc(user.uid, ['sessions', sid], updatedSession).catch(err => {
+          console.error("Failed to update session in Firestore", err);
+        });
+      }
       return sid;
     } else {
       const sid = Math.random().toString(36).substring(2, 15);
@@ -115,7 +148,10 @@ export const AppProvider = ({ children }) => {
       };
       setCurrentSessionId(sid);
       sessionStorage.setItem('sa_current_sid', sid);
-      setSessions(prev => [newSession, ...prev].slice(0, 10));
+      setSessions(prev => {
+        if (!Array.isArray(prev)) return prev;
+        return [newSession, ...prev].slice(0, 10);
+      });
       
       if (!isKnownDevice) {
         addHistoryEvent('security_alert', `New unrecognized device detected: ${fingerprint.sessionName}`);
@@ -123,9 +159,14 @@ export const AppProvider = ({ children }) => {
       } else {
         addHistoryEvent('session_created', `New device authorized: ${fingerprint.sessionName}`);
       }
+      if (user) {
+        setUserDoc(user.uid, ['sessions', sid], newSession).catch(err => {
+          console.error("Failed to save new session to Firestore", err);
+        });
+      }
       return sid;
     }
-  }, [sessions, trustedDevices, addHistoryEvent, settings.toasts]);
+  }, [sessions, trustedDevices, addHistoryEvent, settings.toasts, isDataLoaded, user]);
 
   const toggleTrustDevice = useCallback((stableId) => {
     setTrustedDevices(prev => {
@@ -155,9 +196,10 @@ export const AppProvider = ({ children }) => {
     score += hasTrusted ? 25 : 5;
     
     // 3. Active Sessions (Max 25)
-    if (sessions.length === 1) score += 25;
-    else if (sessions.length <= 3) score += 15;
-    else if (sessions.length <= 6) score += 5;
+    const sessionCount = Array.isArray(sessions) ? sessions.length : 0;
+    if (sessionCount === 1) score += 25;
+    else if (sessionCount > 1 && sessionCount <= 3) score += 15;
+    else if (sessionCount > 3 && sessionCount <= 6) score += 5;
     
     // 4. Security Health (Max 25)
     const now = new Date().getTime();
@@ -215,7 +257,7 @@ export const AppProvider = ({ children }) => {
       }
     });
 
-    const devices = new Set(sessions.map(s => s.stableId));
+    const devices = new Set((Array.isArray(sessions) ? sessions : []).map(s => s.stableId));
 
     return {
       totalLogins: loginEvents.length,
@@ -223,19 +265,55 @@ export const AppProvider = ({ children }) => {
       avgSessionDuration: sessionCount > 0 ? totalDuration / sessionCount : 0,
       longestSession,
       totalDevicesUsed: devices.size,
-      currentActiveSessions: sessions.length
+      currentActiveSessions: Array.isArray(sessions) ? sessions.length : 0
     };
   }, [history, sessions]);
 
   // Sync state
   useEffect(() => {
     localStorage.setItem('sa_history', JSON.stringify(history));
-    localStorage.setItem('sa_sessions', JSON.stringify(sessions));
+    if (sessions !== null) {
+      localStorage.setItem('sa_sessions', JSON.stringify(sessions));
+    }
   }, [history, sessions]);
+
+  const loadData = useCallback(async () => {
+    if (!user) return;
+    try {
+      const firestoreSessions = await getUserSubcollection(user.uid, 'sessions');
+      setSessions(firestoreSessions || []);
+      setIsDataLoaded(true);
+    } catch (error) {
+      console.error("Failed to load sessions from Firestore", error);
+      const savedSessions = JSON.parse(localStorage.getItem('sa_sessions') || '[]');
+      setSessions(savedSessions);
+      setIsDataLoaded(true);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!loading && user && !isDataLoaded) {
+      const timer = setTimeout(() => {
+        loadData();
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, user, isDataLoaded, loadData]);
+
+  useEffect(() => {
+    if (!user) {
+      const timer = setTimeout(() => {
+        setIsDataLoaded(false);
+        setSessions(null);
+        isInitialized.current = false;
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [user]);
 
   // Session Restoration Logic (Fixed to avoid sync setState in effect)
   useEffect(() => {
-    if (!loading && user && !isInitialized.current) {
+    if (!loading && user && isDataLoaded && !isInitialized.current) {
       isInitialized.current = true;
       
       const fingerprint = getSessionFingerprint();
@@ -260,7 +338,7 @@ export const AppProvider = ({ children }) => {
         return () => clearTimeout(timer);
       }
     }
-  }, [loading, user, currentSessionId, addHistoryEvent, settings.toasts, createNewSession]);
+  }, [loading, user, isDataLoaded, currentSessionId, addHistoryEvent, settings.toasts, createNewSession]);
 
   // Inactivity tracking
   useEffect(() => {
@@ -270,9 +348,13 @@ export const AppProvider = ({ children }) => {
       const now = Date.now().toString();
       localStorage.setItem('sa_last_activity', now);
       if (currentSessionId) {
-        setSessions(prev => prev.map(s => 
-          s.sessionId === currentSessionId ? { ...s, lastActivity: new Date().toISOString() } : s
-        ));
+        setSessions(prev => {
+          if (!Array.isArray(prev)) return prev;
+          
+          return prev.map(s => 
+            s.sessionId === currentSessionId ? { ...s, lastActivity: new Date().toISOString() } : s
+          );
+        });
       }
       if (showSessionWarning) {
         setShowSessionWarning(false);
