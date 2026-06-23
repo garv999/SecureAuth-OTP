@@ -14,6 +14,7 @@ import {
 import { auth, googleProvider } from '../services/firebase';
 import { AuthContext } from './AuthContext';
 import { toast } from 'react-hot-toast';
+import { logAuditEvent } from '../services/firestore';
 
 const initialState = {
   user: null,
@@ -61,6 +62,9 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: 'AUTH_STATE_CHANGED', payload: freshUser });
       setMergeCredential(null);
       toast.success('Accounts merged successfully');
+      logAuditEvent(freshUser.uid, 'account_merge', { details: 'Google and Phone accounts merged successfully.' }).catch(err => {
+        console.error("Failed to log account merge:", err);
+      });
       console.log("[MERGE STEP 3] Merge completed");
     } catch (error) {
       console.error("[MERGE ERROR]", error);

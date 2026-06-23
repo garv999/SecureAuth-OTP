@@ -1,5 +1,6 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { 
   BsPhone, 
   BsFingerprint, 
@@ -13,20 +14,103 @@ import {
   BsLaptop,
   BsArrowUpRight,
   BsArrowDownRight,
-  BsDash
+  BsDash,
+  BsArrowRight,
+  BsBoxArrowInRight,
+  BsBoxArrowRight,
+  BsArrowRepeat,
+  BsXLg,
+  BsShieldX,
+  BsLink45Deg,
+  BsExclamationTriangleFill,
+  BsInfoCircle
 } from 'react-icons/bs';
 import { FcGoogle } from 'react-icons/fc';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
 import { useAppContext } from '../hooks/useAppContext';
+import { getAuditLogs } from '../services/firestore';
 import Button from '../components/common/Button';
 import EmptyState from '../components/common/EmptyState';
 
+const EVENT_TYPE_LABELS = {
+  login: 'Login',
+  logout: 'Logout',
+  phone_login: 'Phone Login',
+  google_login: 'Google Login',
+  session_restore: 'Session Restored',
+  session_expiry: 'Session Expired',
+  session_created: 'Session Created',
+  session_terminated: 'Session Terminated',
+  provider_linked: 'Provider Linked',
+  provider_unlinked: 'Provider Unlinked',
+  account_merge: 'Account Merged',
+  trusted_device_added: 'Trusted Device Added',
+  trusted_device_removed: 'Trusted Device Removed',
+  security_alert: 'Security Alert'
+};
+
+const RISK_BADGES = {
+  LOW: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
+  MEDIUM: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+  HIGH: 'bg-red-500/10 text-red-500 border-red-500/20'
+};
+
+const getEventIcon = (type) => {
+  switch (type) {
+    case 'login':
+    case 'phone_login':
+    case 'google_login':
+      return <BsBoxArrowInRight className="text-emerald-500" />;
+    case 'logout':
+    case 'session_expiry':
+      return <BsBoxArrowRight className="text-amber-500" />;
+    case 'session_restore':
+      return <BsArrowRepeat className="text-blue-500" />;
+    case 'session_created':
+      return <BsShieldCheck className="text-blue-400" />;
+    case 'session_terminated':
+      return <BsXLg className="text-red-500" />;
+    case 'provider_linked':
+      return <BsShieldCheck className="text-emerald-500" />;
+    case 'provider_unlinked':
+      return <BsShieldX className="text-red-400" />;
+    case 'account_merge':
+      return <BsLink45Deg className="text-purple-500" />;
+    case 'trusted_device_added':
+      return <BsShieldCheck className="text-teal-400" />;
+    case 'trusted_device_removed':
+      return <BsShieldX className="text-rose-500" />;
+    case 'security_alert':
+      return <BsExclamationTriangleFill className="text-red-500 animate-pulse" />;
+    default:
+      return <BsInfoCircle className="text-slate-400" />;
+  }
+};
+
 const Dashboard = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { history, analytics, securityScore } = useAppContext();
   const [copied, setCopied] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [recentEvents, setRecentEvents] = useState([]);
+  const [loadingEvents, setLoadingEvents] = useState(true);
+
+  useEffect(() => {
+    const fetchRecentEvents = async () => {
+      if (!user) return;
+      try {
+        const { logs: fetchedLogs } = await getAuditLogs(user.uid, 5);
+        setRecentEvents(fetchedLogs);
+      } catch (err) {
+        console.error("Failed to fetch recent events on dashboard:", err);
+      } finally {
+        setLoadingEvents(false);
+      }
+    };
+    fetchRecentEvents();
+  }, [user]);
 
   const copyToClipboard = useCallback((text) => {
     navigator.clipboard.writeText(text);
@@ -221,6 +305,71 @@ const Dashboard = () => {
           onAction={() => setSearchTerm('')}
         />
       )}
+
+      {/* Recent Security Events Card */}
+      <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-3xl p-6 mt-8">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-xl font-bold text-[var(--text-primary)]">Recent Security Events</h2>
+            <p className="text-xs text-[var(--text-secondary)] mt-1 font-medium">Latest security activities from your account.</p>
+          </div>
+          <button 
+            onClick={() => navigate('/audit-center')}
+            className="flex items-center gap-2 text-xs font-bold text-blue-500 uppercase tracking-wider hover:underline"
+          >
+            View All <BsArrowRight />
+          </button>
+        </div>
+
+        {loadingEvents ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-14 bg-[var(--bg-color)] border border-[var(--border-color)] rounded-xl animate-pulse" />
+            ))}
+          </div>
+        ) : recentEvents.length === 0 ? (
+          <div className="text-center py-6 text-sm text-[var(--text-secondary)] font-medium">
+            No recent security events found.
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {recentEvents.map(event => (
+              <div 
+                key={event.id}
+                className="flex items-center justify-between p-4 bg-[var(--bg-color)] border border-[var(--border-color)] rounded-2xl text-sm"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-[var(--card-bg)] border border-[var(--border-color)] flex items-center justify-center shrink-0">
+                    {getEventIcon(event.eventType)}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-bold text-[var(--text-primary)]">
+                        {EVENT_TYPE_LABELS[event.eventType] || event.eventType}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${RISK_BADGES[event.riskLevel]}`}>
+                        {event.riskLevel}
+                      </span>
+                    </div>
+                    <p className="text-[var(--text-secondary)] text-xs font-medium mt-0.5">
+                      {event.metadata?.details || 'System activity event.'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-right shrink-0">
+                  <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider block">
+                    {event.device}
+                  </span>
+                  <span className="text-[10px] text-[var(--text-muted)] font-semibold mt-0.5 block">
+                    {new Date(event.timestamp).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
     </motion.div>
   );
