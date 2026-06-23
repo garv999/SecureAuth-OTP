@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useCallback } from 'react';
+import { useEffect, useReducer, useCallback, useState } from 'react';
 import { 
   onAuthStateChanged, 
   signOut, 
@@ -47,6 +47,28 @@ function authReducer(state, action) {
 
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
+  const [mergeCredential, setMergeCredential] = useState(null);
+
+  const mergeAccount = useCallback(async () => {
+    if (!mergeCredential || !auth.currentUser) return;
+    dispatch({ type: 'AUTH_START' });
+    try {
+      console.log("[MERGE STEP 1] Initiating merge");
+      await linkWithCredential(auth.currentUser, mergeCredential);
+      await auth.currentUser.reload();
+      const freshUser = { ...auth.currentUser };
+      console.log("[MERGE STEP 2] Merge successful");
+      dispatch({ type: 'AUTH_STATE_CHANGED', payload: freshUser });
+      setMergeCredential(null);
+      toast.success('Accounts merged successfully');
+      console.log("[MERGE STEP 3] Merge completed");
+    } catch (error) {
+      console.error("[MERGE ERROR]", error);
+      dispatch({ type: 'AUTH_FAILURE', payload: error.message });
+      toast.error('Failed to merge accounts.');
+    }
+  }, [mergeCredential]);
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -97,36 +119,37 @@ export const AuthProvider = ({ children }) => {
         console.log("[STEP linkWithCredential EXIT]");
         
         await result.user.reload();
-        const freshUser = auth.currentUser;
+        const freshUser = { ...auth.currentUser };
         
+        console.log("[PROVIDER SYNC] old providers:", state.user?.providerData.map(p => p.providerId));
+        console.log("[PROVIDER SYNC] new providers:", freshUser.providerData.map(p => p.providerId));
+        console.log("[PROVIDER SYNC] user reference changed: true");
+
         console.log("[AuthProvider] Phone linked. User UID:", freshUser.uid);
         dispatch({ type: 'AUTH_STATE_CHANGED', payload: freshUser });
         dispatch({ type: 'SET_VERIFICATION_ID', payload: null });
+        toast.success('Phone linked successfully');
         return result;
       } catch (error) {
         console.group("FULL PHONE AUTH ERROR");
         console.log("RAW ERROR:", error);
-        console.log("TYPE:", typeof error);
-        console.log("INSTANCEOF ERROR:", error instanceof Error);
         console.log("CODE:", error?.code);
-        console.log("MESSAGE:", error?.message);
-        console.log("NAME:", error?.name);
-        console.log("STACK:", error?.stack);
-        console.log("STRINGIFIED:");
-        try {
-          console.log(JSON.stringify(error, null, 2));
-        } catch {
-          console.log("Unable to stringify");
-        }
         console.groupEnd();
         
-        let friendlyMessage = error.message;
-        if (error.code === 'auth/invalid-verification-code') friendlyMessage = 'The verification code is invalid. Please check and try again.';
-        if (error.code === 'auth/code-expired') friendlyMessage = 'The verification code has expired. Please request a new one.';
-        if (error.code === 'auth/credential-already-in-use') friendlyMessage = 'This phone number is already linked to another account.';
-        if (error.code === 'auth/requires-recent-login') friendlyMessage = 'For security, please sign out and sign in again before linking a new provider.';
-        
-        toast.error(friendlyMessage);
+        if (error.code === 'auth/credential-already-in-use') {
+          console.log("[MERGE DETECTED]");
+          console.log("current UID:", auth.currentUser.uid);
+          console.log("credential owner UID:", error.credential?.uid); // May not be available directly in error
+          
+          setMergeCredential(error.credential);
+          toast.error('This phone number is already linked to another account. A merge option is available.');
+        } else {
+           let friendlyMessage = error.message;
+           if (error.code === 'auth/invalid-verification-code') friendlyMessage = 'The verification code is invalid. Please check and try again.';
+           if (error.code === 'auth/code-expired') friendlyMessage = 'The verification code has expired. Please request a new one.';
+           if (error.code === 'auth/requires-recent-login') friendlyMessage = 'For security, please sign out and sign in again before linking a new provider.';
+           toast.error(friendlyMessage);
+        }
         dispatch({ type: 'AUTH_FAILURE', payload: error.message });
         throw error;
       }
@@ -205,29 +228,24 @@ export const AuthProvider = ({ children }) => {
     try {
       await linkWithPopup(auth.currentUser, googleProvider);
       await auth.currentUser.reload();
-      dispatch({ type: 'AUTH_STATE_CHANGED', payload: auth.currentUser });
+      const freshUser = { ...auth.currentUser };
+      
+      console.log("[PROVIDER SYNC] old providers:", state.user?.providerData.map(p => p.providerId));
+      console.log("[PROVIDER SYNC] new providers:", freshUser.providerData.map(p => p.providerId));
+      console.log("[PROVIDER SYNC] user reference changed: true");
+
+      dispatch({ type: 'AUTH_STATE_CHANGED', payload: freshUser });
       toast.success('Google account linked successfully');
     } catch (error) {
       console.group("FULL PHONE AUTH ERROR");
       console.log("RAW ERROR:", error);
-      console.log("TYPE:", typeof error);
-      console.log("INSTANCEOF ERROR:", error instanceof Error);
       console.log("CODE:", error?.code);
-      console.log("MESSAGE:", error?.message);
-      console.log("NAME:", error?.name);
-      console.log("STACK:", error?.stack);
-      console.log("STRINGIFIED:");
-      try {
-        console.log(JSON.stringify(error, null, 2));
-      } catch {
-        console.log("Unable to stringify");
-      }
       console.groupEnd();
       dispatch({ type: 'AUTH_FAILURE', payload: error.message });
       toast.error(error.message);
       throw error;
     }
-  }, []);
+  }, [state.user]);
 
   const linkPhone = useCallback(async (phoneNumber, appVerifier) => {
     if (!auth.currentUser) {
@@ -291,29 +309,24 @@ export const AuthProvider = ({ children }) => {
     try {
       await unlink(auth.currentUser, providerId);
       await auth.currentUser.reload();
-      dispatch({ type: 'AUTH_STATE_CHANGED', payload: auth.currentUser });
+      const freshUser = { ...auth.currentUser };
+      
+      console.log("[PROVIDER SYNC] old providers:", state.user?.providerData.map(p => p.providerId));
+      console.log("[PROVIDER SYNC] new providers:", freshUser.providerData.map(p => p.providerId));
+      console.log("[PROVIDER SYNC] user reference changed: true");
+      
+      dispatch({ type: 'AUTH_STATE_CHANGED', payload: freshUser });
       toast.success('Provider unlinked successfully');
     } catch (error) {
       console.group("FULL PHONE AUTH ERROR");
       console.log("RAW ERROR:", error);
-      console.log("TYPE:", typeof error);
-      console.log("INSTANCEOF ERROR:", error instanceof Error);
       console.log("CODE:", error?.code);
-      console.log("MESSAGE:", error?.message);
-      console.log("NAME:", error?.name);
-      console.log("STACK:", error?.stack);
-      console.log("STRINGIFIED:");
-      try {
-        console.log(JSON.stringify(error, null, 2));
-      } catch {
-        console.log("Unable to stringify");
-      }
       console.groupEnd();
       dispatch({ type: 'AUTH_FAILURE', payload: error.message });
       toast.error(error.message);
       throw error;
     }
-  }, []);
+  }, [state.user]);
 
   const reauthenticate = useCallback(async (credential) => {
     if (!auth.currentUser) return;
@@ -393,6 +406,9 @@ export const AuthProvider = ({ children }) => {
     reauthenticate,
     deleteAccount,
     logout,
+    mergeCredential,
+    setMergeCredential,
+    mergeAccount,
     setConfirmationResult: (result) => dispatch({ type: 'SET_CONFIRMATION_RESULT', payload: result })
   };
 
