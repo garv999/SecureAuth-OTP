@@ -119,6 +119,15 @@ const Security = () => {
     }
   };
 
+  const handleLinkGoogle = async () => {
+    try {
+      await linkGoogle();
+      addHistoryEvent('provider_linked', 'Google account connected.');
+    } catch (error) {
+      console.error("Failed to link Google account:", error);
+    }
+  };
+
   const getDeviceIcon = (type) => {
     switch (type) {
       case 'Mobile': return <BsPhone />;
@@ -222,7 +231,7 @@ const Security = () => {
                 ) : (
                   <Button 
                     variant="primary" 
-                    onClick={linkGoogle}
+                    onClick={handleLinkGoogle}
                     className="h-10 text-xs"
                   >
                     Connect Google
