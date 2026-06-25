@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 import { getSessionFingerprint } from '../utils/session';
 import { INACTIVITY_LIMIT, WARNING_THRESHOLD } from '../constants/session';
 import { AppContext } from './AppContext';
-import { getUserSubcollection, setUserDoc, deleteUserDoc, logAuditEvent } from '../services/firestore';
+import { getUserSubcollection, setUserDoc, deleteUserDoc } from '../services/firestore';
 
 export const AppProvider = ({ children }) => {
   const { user, loading, logout } = useAuth();
@@ -61,19 +61,7 @@ export const AppProvider = ({ children }) => {
       timestamp: new Date().toISOString()
     };
     setHistory(prev => [newEvent, ...prev].slice(0, 100));
-
-    // Map internal history event type to standard audit log event type
-    let auditType = type;
-    if (type === 'trust_added') auditType = 'trusted_device_added';
-    if (type === 'trust_removed') auditType = 'trusted_device_removed';
-    if (type === 'other_sessions_terminated') auditType = 'session_terminated';
-
-    if (user) {
-      logAuditEvent(user.uid, auditType, { details }).catch(err => {
-        console.error("Failed to log audit event to Firestore:", err);
-      });
-    }
-  }, [user]);
+  }, []);
 
   const clearHistory = useCallback(() => {
     setHistory([]);

@@ -22,11 +22,6 @@ vi.mock('../services/firebase', () => ({
   googleProvider: {}
 }));
 
-// Mock Firestore service
-vi.mock('../services/firestore', () => ({
-  logAuditEvent: vi.fn().mockResolvedValue()
-}));
-
 const TestComponent = () => {
   const { user, loading, status, loginWithGoogle, logout } = useContext(AuthContext);
   if (loading) return <div>Loading...</div>;

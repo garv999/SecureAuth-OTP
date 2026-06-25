@@ -9,8 +9,7 @@ import {
   BsGear,
   BsBoxArrowRight,
   BsList,
-  BsXLg,
-  BsShieldCheck
+  BsXLg
 } from 'react-icons/bs';
 
 const SidebarContent = ({ links, setIsOpen, setIsLogoutModalOpen }) => {
@@ -66,7 +65,6 @@ const Sidebar = ({ setIsLogoutModalOpen }) => {
     { to: '/profile', label: 'Profile', icon: <BsPerson /> },
     { to: '/security', label: 'Security', icon: <BsShieldLock /> },
     { to: '/activity', label: 'Activity', icon: <BsClockHistory /> },
-    { to: '/audit-center', label: 'Audit Center', icon: <BsShieldCheck /> },
     { to: '/settings', label: 'Settings', icon: <BsGear /> },
   ];
 

@@ -15,7 +15,6 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Security = lazy(() => import('./pages/Security'));
 const Activity = lazy(() => import('./pages/Activity'));
-const AuditCenter = lazy(() => import('./pages/AuditCenter'));
 const Settings = lazy(() => import('./pages/Settings'));
 const Layout = lazy(() => import('./components/Layout'));
 
@@ -70,7 +69,6 @@ const AnimatedRoutes = () => {
             <Route path="/profile" element={<Profile />} />
             <Route path="/security" element={<Security />} />
             <Route path="/activity" element={<Activity />} />
-            <Route path="/audit-center" element={<AuditCenter />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
 
