@@ -58,3 +58,24 @@ export const formatSessionAge = (timestamp) => {
   }
   return `${minutes}m`;
 };
+
+export const normalizeSession = (session) => {
+  if (!session) return null;
+  const now = new Date().toISOString();
+  
+  const sessionId = session.sessionId || session.id || Math.random().toString(36).substring(2, 15);
+
+  return {
+    sessionId,
+    stableId: session.stableId || "",
+    deviceName: session.deviceName || "Unknown Device",
+    deviceType: session.deviceType || "Desktop",
+    browserName: session.browserName || "Unknown Browser",
+    operatingSystem: session.operatingSystem || "Unknown OS",
+    sessionName: session.sessionName || "Unknown Device",
+    userAgent: session.userAgent || "",
+    loginTimestamp: session.loginTimestamp || session.lastActivity || now,
+    lastActivity: session.lastActivity || now
+  };
+};
+

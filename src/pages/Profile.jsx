@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 
 const Profile = () => {
   const { user } = useAuth();
+  if (!user) return null;
   const isGoogle = user.providerData[0]?.providerId === 'google.com';
 
   const details = [

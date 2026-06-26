@@ -375,8 +375,8 @@ const AuditCenter = () => {
                         <span className="font-bold text-[var(--text-primary)] text-sm md:text-base group-hover:text-blue-500 transition-colors">
                           {EVENT_TYPE_LABELS[log.eventType] || log.eventType}
                         </span>
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${RISK_BADGES[log.riskLevel]}`}>
-                          {log.riskLevel}
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${RISK_BADGES[log.riskLevel || 'LOW']}`}>
+                          {log.riskLevel || 'LOW'}
                         </span>
                       </div>
                       <p className="text-[var(--text-secondary)] text-xs md:text-sm font-medium mt-1">
@@ -468,8 +468,8 @@ const AuditCenter = () => {
                       </p>
                     </div>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold border ${RISK_BADGES[selectedEvent.riskLevel]}`}>
-                    {selectedEvent.riskLevel}
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold border ${RISK_BADGES[selectedEvent.riskLevel || 'LOW']}`}>
+                    {selectedEvent.riskLevel || 'LOW'}
                   </span>
                 </div>
 

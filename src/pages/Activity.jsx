@@ -35,10 +35,10 @@ const Activity = () => {
 
   const filteredHistory = useMemo(() => {
     return history.filter(event => {
-      const matchesSearch = event.details?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                           event.type.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesType = filterType === 'all' || event.type === filterType;
-      const matchesDate = !dateFilter || event.timestamp.startsWith(dateFilter);
+      const matchesSearch = event?.details?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                           event?.type?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesType = filterType === 'all' || event?.type === filterType;
+      const matchesDate = !dateFilter || (event?.timestamp && typeof event.timestamp === 'string' && event.timestamp.startsWith(dateFilter));
       
       return matchesSearch && matchesType && matchesDate;
     });
@@ -62,7 +62,7 @@ const Activity = () => {
       case 'session_restore': return 'Session Restored';
       case 'session_expiry': return 'Session Expired';
       case 'session_extended': return 'Session Extended';
-      default: return type.replace(/_/g, ' ').toUpperCase();
+      default: return (type || '').replace(/_/g, ' ').toUpperCase();
     }
   };
 
@@ -164,7 +164,7 @@ const Activity = () => {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                     <span className="font-bold text-[var(--text-primary)] text-lg group-hover:text-[var(--accent-blue)] transition-colors">{getLabel(event.type)}</span>
                     <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest bg-[var(--bg-color)] px-3 py-1 rounded-full border border-[var(--border-color)]">
-                      {new Date(event.timestamp).toLocaleString()}
+                      {event?.timestamp ? new Date(event.timestamp).toLocaleString() : 'Unknown Time'}
                     </span>
                   </div>
                   <p className="text-[var(--text-secondary)] text-sm font-medium leading-relaxed">{event.details || 'System event processed successfully.'}</p>

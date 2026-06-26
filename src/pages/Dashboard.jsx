@@ -120,6 +120,7 @@ const Dashboard = () => {
   }, []);
 
   const exportReport = useCallback((format) => {
+    if (!user) return;
     const provider = user.providerData[0]?.providerId === 'google.com' ? 'Google' : 'Phone Auth';
     const identifier = user.providerData[0]?.providerId === 'google.com' ? user.email : user.phoneNumber;
 
@@ -165,6 +166,7 @@ const Dashboard = () => {
   ], [analytics, securityScore]);
 
   const infoCards = useMemo(() => {
+    if (!user) return [];
     const provider = user.providerData[0]?.providerId === 'google.com' ? 'Google' : 'Phone Auth';
     const mainIdentifier = user.providerData[0]?.providerId === 'google.com' ? user.email : user.phoneNumber;
     
@@ -177,17 +179,7 @@ const Dashboard = () => {
     );
   }, [user, searchTerm]);
 
-  if (history.length === 0) {
-    return (
-      <EmptyState 
-        icon={<BsCalendarCheck />}
-        title="Welcome to SecureAuth Pro"
-        message="Your security dashboard is ready. Start by exploring your account settings or checking your security score."
-        actionLabel="Explore Security"
-        onAction={() => window.location.href = '/security'}
-      />
-    );
-  }
+  if (!user) return null;
 
   return (
     <motion.div
@@ -329,7 +321,7 @@ const Dashboard = () => {
           </div>
         ) : recentEvents.length === 0 ? (
           <div className="text-center py-6 text-sm text-[var(--text-secondary)] font-medium">
-            No recent security events found.
+            No recent security events.
           </div>
         ) : (
           <div className="space-y-4">

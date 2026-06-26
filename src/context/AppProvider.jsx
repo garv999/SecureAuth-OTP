@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { toast } from 'react-hot-toast';
-import { getSessionFingerprint } from '../utils/session';
+import { getSessionFingerprint, normalizeSession } from '../utils/session';
 import { INACTIVITY_LIMIT, WARNING_THRESHOLD } from '../constants/session';
 import { AppContext } from './AppContext';
 import { getUserSubcollection, setUserDoc, deleteUserDoc, logAuditEvent } from '../services/firestore';
@@ -23,7 +23,14 @@ export const AppProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => localStorage.getItem('sa_theme') || 'dark');
   const [history, setHistory] = useState(() => JSON.parse(localStorage.getItem('sa_history')) || []);
   const [sessions, setSessions] = useState(null);
-  const [trustedDevices, setTrustedDevices] = useState(() => JSON.parse(localStorage.getItem('sa_trusted_devices')) || []);
+  const [trustedDevices, setTrustedDevices] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('sa_trusted_devices'));
+      return Array.isArray(saved) ? saved : [];
+    } catch {
+      return [];
+    }
+  });
 
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   
@@ -293,12 +300,14 @@ export const AppProvider = ({ children }) => {
     if (!user) return;
     try {
       const firestoreSessions = await getUserSubcollection(user.uid, 'sessions');
-      setSessions(firestoreSessions || []);
+      const normalized = (firestoreSessions || []).map(normalizeSession);
+      setSessions(normalized);
       setIsDataLoaded(true);
     } catch (error) {
       console.error("Failed to load sessions from Firestore", error);
       const savedSessions = JSON.parse(localStorage.getItem('sa_sessions') || '[]');
-      setSessions(savedSessions);
+      const normalized = (savedSessions || []).map(normalizeSession);
+      setSessions(normalized);
       setIsDataLoaded(true);
     }
   }, [user]);
@@ -317,6 +326,8 @@ export const AppProvider = ({ children }) => {
       const timer = setTimeout(() => {
         setIsDataLoaded(false);
         setSessions(null);
+        setCurrentSessionId(null);
+        sessionStorage.removeItem('sa_current_sid');
         isInitialized.current = false;
       }, 0);
       return () => clearTimeout(timer);
