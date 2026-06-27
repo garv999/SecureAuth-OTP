@@ -1,4 +1,6 @@
-# SecureAuth-OTP 🛡️
+# SecureAuth-OTP
+
+### A production-ready, enterprise-grade multi-provider identity and access management system built with React, Firebase, and Vite.
 
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev)
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
@@ -8,19 +10,15 @@
 [![Vitest](https://img.shields.io/badge/Vitest-393939?style=for-the-badge&logo=vitest&logoColor=729B1B)](https://vitest.dev)
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-SecureAuth-OTP is a production-ready, enterprise-grade multi-provider identity and access management system built with React, Firebase Authentication, Cloud Firestore, and Vite. The application showcases advanced session integrity management, real-time cross-tab synchronization, trusted device evaluation, and security monitoring.
-
-🚀 **Live Demo**:
-[https://auth-otp-8693d.web.app](https://auth-otp-8693d.web.app)
-
-📂 **GitHub Repository**:
-[https://github.com/garv999/SecureAuth-OTP](https://github.com/garv999/SecureAuth-OTP)
+**Live Demo**: [https://auth-otp-8693d.web.app](https://auth-otp-8693d.web.app)  
+**GitHub Repository**: [https://github.com/garv999/SecureAuth-OTP](https://github.com/garv999/SecureAuth-OTP)
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
-- [Features](#features)
+- [Highlights](#highlights)
+- [Screenshots](#screenshots)
 - [Tech Stack](#tech-stack)
 - [Project Architecture](#project-architecture)
 - [Folder Structure](#folder-structure)
@@ -30,65 +28,54 @@ SecureAuth-OTP is a production-ready, enterprise-grade multi-provider identity a
 - [Security Features](#security-features)
 - [Performance Optimizations](#performance-optimizations)
 - [Deployment](#deployment)
+- [Project Status](#project-status)
+- [Roadmap](#roadmap)
 - [Future Improvements](#future-improvements)
 - [Author](#author)
+- [License](#license)
 
 ---
 
-## ✨ Features
+## Highlights
 
-* **Multi-Provider Authentication**: Instant Google Login and SMS-based Phone OTP login with reCAPTCHA.
-* **Account Linking & Merging**: Dynamically link multiple authentication credentials (Google + Phone) to a single profile.
-* **Active Session Management**: Interactive list of active sessions with remote revocation capabilities.
-* **Trusted Devices**: Hardware trust designation utilizing device fingerprinting to skip secondary checks.
-* **Cross-Tab Synchronization**: Instant synchronization of Theme, User settings, Trusted devices, Active sessions, and History logs across tabs via browser Storage Events (zero page-reloads).
-* **Security Dashboard**: Core key metrics dashboard summarizing logins, session status, device types, and real-time security events.
-* **Audit Center**: Immutable security event logs with client-side query filters, risk-level badges, and scroll-based pagination.
-* **Responsive UI**: Sleek dark and light mode theme support with smooth micro-animations powered by Framer Motion.
-* **Error Boundaries**: Root-level error boundary capturing catastrophic failures to prevent state leaks.
-* **Session Restoration**: Silent session restoration upon browser refresh, secured against stale storage keys.
-* **Defensive Runtime Hardening**: Optional chaining, strict JSON parsers, and type checks to protect the client from corrupted Firestore documents or database schema migrations.
+* **Multi-provider Authentication**: Seamless Google OAuth and secure SMS-based Phone OTP login with reCAPTCHA.
+* **Account Linking & Merging**: Link multiple login methods (Google + Phone) to a unified profile record.
+* **Enterprise Audit Center**: Read-only, append-only security logs with client-side filters, risk-level badges, and scroll-based pagination.
+* **Active Session Management**: Real-time display of active browser sessions with single-click remote revocation.
+* **Trusted Devices**: Hardware fingerprint trust mapping to secure account access.
+* **Cross-Tab Synchronization**: Zero-reload sync of Theme, User settings, Trusted devices, Active sessions, and History logs across tabs via browser Storage Events.
+* **Firebase Integration**: Leverages Firebase Authentication and Firestore subcollections.
+* **Responsive UI**: Glassmorphism design and micro-animations with support for dark/light mode themes.
+* **Firebase Hosting**: High-speed CDN hosting with optimized environment configurations.
 
 ---
 
-## 📸 Screenshots
+## Screenshots
 
-Below are placeholders for the visual interface layouts of the project:
-
-### 1. Login Page
-![Login Page](Screenshots/login_page.png)
-
-### 2. Dashboard Overview
-![Dashboard](Screenshots/Dashboard.png)
-
-### 3. Security Page
-![Security Page](Screenshots/Security.png)
-
-### 4. Activity Timeline
-![Activity Page](Screenshots/Activity_page.png)
-
-### 5. Audit Center
-![Audit Center](Screenshots/audit_center.png)
-
-### 6. Settings Page
-![Settings](Screenshots/settings.png)
+| Login Page | Dashboard Overview |
+| --- | --- |
+| ![Login Page](Screenshots/login_page.png) | ![Dashboard](Screenshots/Dashboard.png) |
+| **Security Page** | **Activity Timeline** |
+| ![Security Page](Screenshots/Security.png) | ![Activity Page](Screenshots/Activity_page.png) |
+| **Audit Center** | **Settings Page** |
+| ![Audit Center](Screenshots/audit_center.png) | ![Settings](Screenshots/settings.png) |
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-* **Frontend Framework**: [React 19](https://react.dev) + [Vite](https://vitejs.dev)
+* **Frontend**: [React 19](https://react.dev) + [Vite](https://vitejs.dev)
 * **Routing**: [React Router DOM v6](https://reactrouter.com/)
 * **Animations**: [Framer Motion](https://www.framer.com/motion/)
 * **Database & Auth**: [Firebase v10](https://firebase.google.com/) (Authentication & Cloud Firestore)
-* **Styling**: Vanilla CSS custom variables & CSS modules
+* **Styling**: CSS custom variables & CSS modules
 * **Unit Testing**: [Vitest](https://vitest.dev) + [React Testing Library](https://testing-library.com/)
-* **End-to-End Testing**: [Playwright](https://playwright.dev)
+* **E2E Testing**: [Playwright](https://playwright.dev)
 * **CI/CD**: GitHub Actions
 
 ---
 
-## 🏛️ Project Architecture
+## Project Architecture
 
 ```
                                 +-------------------+
@@ -110,7 +97,7 @@ Below are placeholders for the visual interface layouts of the project:
 
 ---
 
-## 📂 Folder Structure
+## Folder Structure
 
 ```
 src/
@@ -127,7 +114,7 @@ src/
 
 ---
 
-## 🚀 Installation
+## Installation
 
 Follow these steps to set up the project locally:
 
@@ -143,7 +130,7 @@ Follow these steps to set up the project locally:
    ```
 
 3. **Configure environment variables**:
-   Create a `.env` file in the root directory based on `.env.example`:
+   Create a `.env` file in the root directory:
    ```env
    VITE_FIREBASE_API_KEY=your_api_key
    VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
@@ -157,11 +144,10 @@ Follow these steps to set up the project locally:
    ```bash
    npm run dev
    ```
-   Open `http://localhost:5173` in your browser.
 
 ---
 
-## 📦 Production Build
+## Production Build
 
 To compile the production-ready bundle:
 ```bash
@@ -170,21 +156,20 @@ npm run build
 
 ---
 
-## 🧪 Testing
+## Testing
 
-The codebase includes component unit tests and browser end-to-end tests. All tests currently pass:
+The codebase includes component unit tests and E2E browser integration tests. All suites are currently green:
 
-```bash
-# Run Vitest unit tests
-npm test -- --run
-
-# Run Playwright E2E tests
-npx playwright test
-```
+| Command | tool | Scope | status |
+| --- | --- | --- | --- |
+| `npm run lint` | ESLint | Code quality & static analysis | Passing |
+| `npm run build` | Vite Compiler | Production compilation verification | Passing |
+| `npm test -- --run` | Vitest | Component & state unit tests | Passing (15/15) |
+| `npx playwright test` | Playwright | browser integration E2E tests | Passing (3/3) |
 
 ---
 
-## 🛡️ Security Features
+## Security Features
 
 * **Firestore Security Rules**: Explicit rules defining identity isolation and append-only constraints for the `/users/{userId}/audit_logs` collections, preventing log deletion.
 * **Immutable Audit Trail**: Prevent client-side updates and deletes on security logs, preserving auditing integrity.
@@ -196,26 +181,26 @@ npx playwright test
 
 ---
 
-## ⚡ Performance Optimizations
+## Performance Optimizations
 
 * **Vite HMR**: Lightning-fast hot module replacement.
 * **Code Splitting**: Route-level dynamic imports.
 * **Firestore Pagination**: Queries are explicitly paginated via `.limit()` and `.startAfter()` constraints in the Audit Center.
 * **Optimized Session Loading**: Sessions query is capped via `.limit(50)` and ordered by `lastActivity` desc to avoid database scan overheads.
-* **Centralized Metadata**: All event labels, classes, and icons are mapped inside a single `src/utils/eventMetadata.js` module to optimize bundles and reuse assets.
+* **Centralized Event Metadata**: All event labels, classes, and icons are mapped inside a single `src/utils/eventMetadata.js` module to optimize bundles and reuse assets.
 
 ---
 
-## 🚀 Deployment
+## Deployment
 
-The project is configured for one-click deployment using **Firebase Hosting**:
+The project is configured for one-click deployment using **Firebase Hosting**. Hosting configurations, Firestore Security Rules, and database indexes are pre-configured:
 
 1. Log in to Firebase CLI:
    ```bash
    firebase login
    ```
 
-2. Deploy the application bundle:
+2. Deploy the application bundle and configurations:
    ```bash
    firebase deploy
    ```
@@ -224,7 +209,36 @@ Live Host: [https://auth-otp-8693d.web.app](https://auth-otp-8693d.web.app)
 
 ---
 
-## 🔮 Future Improvements
+## Project Status
+
+**Production Ready**
+* [x] **Firebase Hosting** deployed
+* [x] **Firestore Security Rules** configured
+* [x] **GitHub Actions** CI/CD pipeline enabled
+* [x] **Production build** compiles green
+* [x] **ESLint** checks passing
+* [x] **Unit tests** fully passing (15/15)
+* [x] **E2E tests** fully passing (3/3)
+
+---
+
+## Roadmap
+
+- [x] Google Authentication
+- [x] Phone Authentication
+- [x] Account Linking
+- [x] Session Management
+- [x] Trusted Devices
+- [x] Audit Center
+- [x] Cross-tab Synchronization
+- [x] Firebase Hosting
+- [ ] Cloud Functions
+- [ ] Email Notifications
+- [ ] Admin Dashboard
+
+---
+
+## Future Improvements
 
 * **Cloud Functions**: Migrate audit logging and session termination to backend Cloud Functions.
 * **Server-Side Revocation**: Implement server-side tokens revocation when a session is terminated.
@@ -234,8 +248,15 @@ Live Host: [https://auth-otp-8693d.web.app](https://auth-otp-8693d.web.app)
 
 ---
 
-## 👤 Author
+## Author
 
 **Garv Agarwal**
 
-* GitHub: [Garv999](https://github.com/garv999)
+* GitHub: [@garv999](https://github.com/garv999)
+* Live Demo: [https://auth-otp-8693d.web.app](https://auth-otp-8693d.web.app)
+
+---
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
