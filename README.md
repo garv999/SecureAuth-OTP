@@ -1,47 +1,148 @@
-# SecureAuth Pro 🛡️
+# SecureAuth-OTP 🛡️
 
-SecureAuth Pro is an enterprise-grade, high-performance Identity & Access Management (IAM) application built with React, Firebase, and Vite. It provides a production-ready authentication experience with a focus on session integrity, multi-device intelligence, and zero-trust security principles.
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev)
+[![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
+[![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com)
+[![Firestore](https://img.shields.io/badge/Firestore-FFCA28?style=for-the-badge&logo=firebase&logoColor=orange)](https://firebase.google.com/docs/firestore)
+[![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)](https://playwright.dev)
+[![Vitest](https://img.shields.io/badge/Vitest-393939?style=for-the-badge&logo=vitest&logoColor=729B1B)](https://vitest.dev)
+[![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-## 🏛️ Architecture Overview
+SecureAuth-OTP is a production-ready, enterprise-grade multi-provider identity and access management system built with React, Firebase Authentication, Cloud Firestore, and Vite. The application showcases advanced session integrity management, real-time cross-tab synchronization, trusted device evaluation, and security monitoring.
 
-SecureAuth Pro leverages a modern, modular architecture:
-- **Frontend Framework**: React 19 optimized via Vite for lightning-fast HMR and production bundling.
-- **Authentication Provider**: Firebase Auth utilizing SMS-based One-Time Passwords (OTP) with invisible reCAPTCHA integration.
-- **State Management**: Context API (`useAppContext`, `useAuth`) orchestrates global state, eliminating prop drilling while keeping the component tree lean.
-- **Styling & UI**: Tailwind CSS paired with Framer Motion for rich, performant glassmorphism aesthetics and complex route transitions.
+🚀 **Live Demo**:
+[https://auth-otp-8693d.web.app](https://auth-otp-8693d.web.app)
 
-## 🔐 Authentication Flow
+📂 **GitHub Repository**:
+[https://github.com/garv999/SecureAuth-OTP](https://github.com/garv999/SecureAuth-OTP)
 
-1. **Initialization**: The application attempts to silently restore the Firebase authentication state.
-2. **Identity Request**: Unauthenticated users navigate to `/login` to enter a validated 10-digit phone number.
-3. **reCAPTCHA Verification**: Invisible reCAPTCHA v3 validates the user request before hitting Firebase servers.
-4. **OTP Delivery**: Firebase dispatches a 6-digit SMS code.
-5. **OTP Verification**: The `/verify` route presents a strict, masked input interface. Successful confirmation exchanges the OTP for a short-lived Firebase ID token and a long-lived refresh token.
-6. **Route Protection**: The router captures the original requested URL (`location.state.from`), restoring the user's intended navigation path upon success.
+---
 
-## 🔄 Session Lifecycle
+## 📋 Table of Contents
 
-Sessions in SecureAuth Pro are tracked both by Firebase (cryptographically) and internally (for multi-device intelligence):
-- **Creation**: Upon successful OTP validation, a unique `sessionId` and browser fingerprint are generated and stored in `sessionStorage` and `localStorage`.
-- **Inactivity Monitoring**: The application actively listens for user interactions (mouse, keyboard, touch). If 12 hours (`INACTIVITY_LIMIT`) elapse without interaction, the session is aggressively terminated to prevent unauthorized access.
-- **Restoration**: On page reload, the system verifies `localStorage` data against the `INACTIVITY_LIMIT` before trusting the session. Stale sessions are purged automatically.
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [Tech Stack](#tech-stack)
+- [Project Architecture](#project-architecture)
+- [Folder Structure](#folder-structure)
+- [Installation](#installation)
+- [Production Build](#production-build)
+- [Testing](#testing)
+- [Security Features](#security-features)
+- [Performance Optimizations](#performance-optimizations)
+- [Deployment](#deployment)
+- [Future Improvements](#future-improvements)
+- [Author](#author)
 
-## 📱 Multi-Device Strategy
+---
 
-SecureAuth Pro supports sophisticated concurrent session management:
-- **Device Fingerprinting**: Captures user agent, OS, and hardware profile to uniquely identify devices.
-- **Trusted Devices**: Users can mark specific hardware as "Trusted", persisting this status in `localStorage`. Trusted devices bypass certain secondary checks.
-- **Remote Revocation**: The Security Dashboard allows users to monitor all active sessions globally and instantly revoke access to unrecognized or stale devices.
+## ✨ Features
 
-## ⚙️ Environment Setup
+* **Multi-Provider Authentication**: Instant Google Login and SMS-based Phone OTP login with reCAPTCHA.
+* **Account Linking & Merging**: Dynamically link multiple authentication credentials (Google + Phone) to a single profile.
+* **Active Session Management**: Interactive list of active sessions with remote revocation capabilities.
+* **Trusted Devices**: Hardware trust designation utilizing device fingerprinting to skip secondary checks.
+* **Cross-Tab Synchronization**: Instant synchronization of Theme, User settings, Trusted devices, Active sessions, and History logs across tabs via browser Storage Events (zero page-reloads).
+* **Security Dashboard**: Core key metrics dashboard summarizing logins, session status, device types, and real-time security events.
+* **Audit Center**: Immutable security event logs with client-side query filters, risk-level badges, and scroll-based pagination.
+* **Responsive UI**: Sleek dark and light mode theme support with smooth micro-animations powered by Framer Motion.
+* **Error Boundaries**: Root-level error boundary capturing catastrophic failures to prevent state leaks.
+* **Session Restoration**: Silent session restoration upon browser refresh, secured against stale storage keys.
+* **Defensive Runtime Hardening**: Optional chaining, strict JSON parsers, and type checks to protect the client from corrupted Firestore documents or database schema migrations.
 
-SecureAuth Pro relies on strict environment variable configuration. 
+---
 
-1. Copy the example configuration file:
+## 📸 Screenshots
+
+Below are placeholders for the visual interface layouts of the project:
+
+### 1. Login Page
+![Login Page](docs/images/login.png)
+
+### 2. Dashboard Overview
+![Dashboard](docs/images/dashboard.png)
+
+### 3. Security Page
+![Security Page](docs/images/security.png)
+
+### 4. Activity Timeline
+![Activity Page](docs/images/activity.png)
+
+### 5. Audit Center
+![Audit Center](docs/images/audit.png)
+
+### 6. Settings Page
+![Settings](docs/images/settings.png)
+
+---
+
+## 🛠️ Tech Stack
+
+* **Frontend Framework**: [React 19](https://react.dev) + [Vite](https://vitejs.dev)
+* **Routing**: [React Router DOM v6](https://reactrouter.com/)
+* **Animations**: [Framer Motion](https://www.framer.com/motion/)
+* **Database & Auth**: [Firebase v10](https://firebase.google.com/) (Authentication & Cloud Firestore)
+* **Styling**: Vanilla CSS custom variables & CSS modules
+* **Unit Testing**: [Vitest](https://vitest.dev) + [React Testing Library](https://testing-library.com/)
+* **End-to-End Testing**: [Playwright](https://playwright.dev)
+* **CI/CD**: GitHub Actions
+
+---
+
+## 🏛️ Project Architecture
+
+```
+                                +-------------------+
+                                |    React Client   |
+                                +---------+---------+
+                                          |
+                     +--------------------+--------------------+
+                     |                                         |
+                     v                                         v
+           +---------+---------+                     +---------+---------+
+           | Firebase Auth SDK |                     |  Firestore SDK    |
+           +---------+---------+                     +---------+---------+
+                     |                                         |
+                     v (Token / OAuth)                         v (Query / Writes)
+           +---------+---------+                     +---------+---------+
+           | Firebase Auth API |                     |  Cloud Firestore  |
+           +-------------------+                     +-------------------+
+```
+
+---
+
+## 📂 Folder Structure
+
+```
+src/
+├── components/          # Reusable UI components (Buttons, Modals, Layout)
+├── constants/           # Global app configurations and thresholds
+├── context/             # Global Context providers (AuthProvider, AppProvider)
+├── hooks/               # Custom hooks (useAuth, useAppContext)
+├── pages/               # Main route pages (Dashboard, Security, Activity, AuditCenter, etc.)
+├── services/            # Backend service integrations (firebase, firestore)
+└── utils/               # Formatting, normalization, and event metadata utilities
+```
+
+---
+
+## 🚀 Installation
+
+Follow these steps to set up the project locally:
+
+1. **Clone the repository**:
    ```bash
-   cp .env.example .env
+   git clone https://github.com/garv999/SecureAuth-OTP.git
+   cd SecureAuth-OTP
    ```
-2. Populate `.env` with your Firebase project credentials:
+
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Configure environment variables**:
+   Create a `.env` file in the root directory based on `.env.example`:
    ```env
    VITE_FIREBASE_API_KEY=your_api_key
    VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
@@ -50,59 +151,91 @@ SecureAuth Pro relies on strict environment variable configuration.
    VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
    VITE_FIREBASE_APP_ID=your_app_id
    ```
-*Note: The application will fail gracefully and log a distinct error if required variables are missing.*
 
-## 🛡️ Security Considerations
+4. **Start the development server**:
+   ```bash
+   npm run dev
+   ```
+   Open `http://localhost:5173` in your browser.
 
-- **Secret Protection**: `.env` files are strictly gitignored. Configuration is injected at build time.
-- **Temporal Dead Zone Prevention**: Critical authentication state cannot be accessed prior to initialization.
-- **Cross-Site Scripting (XSS)**: Inputs are strictly typed and validated (e.g., numeric-only OTP parsing) before execution.
-- **Local Storage Integrity**: Session objects stored in `localStorage` are continually validated against timestamp expiry limits; manual manipulation cannot bypass the 12-hour inactivity hard limit.
-- **Error Handling**: A top-level `ErrorBoundary` intercepts unexpected rendering failures, logging them silently while displaying a professional fallback UI to prevent data leakage.
+---
 
-## 🧪 Testing Strategy
+## 📦 Production Build
 
-SecureAuth Pro enforces strict quality gates through comprehensive automated testing:
-- **Unit & Component Testing**: Powered by **Vitest** and **React Testing Library**. Core utilities (e.g., session age formatters) and critical UI components (e.g., the `Button` component loading states) are individually isolated and tested for behavioral correctness.
-- **End-to-End (E2E) Testing**: **Playwright** simulates real user journeys, ensuring critical flows—such as authenticated redirection, phone number validation, and logout mechanics—work flawlessly across modern browsers.
-
-Run tests locally:
+To compile the production-ready bundle:
 ```bash
-npm run test          # Run Vitest (Unit/Component)
-npm run test:e2e      # Run Playwright (E2E Headless)
-npm run test:e2e:headed # Run Playwright (E2E Visible)
+npm run build
 ```
 
-## 📈 Monitoring & Logging Strategy
+---
 
-To guarantee operational visibility without compromising user privacy, we utilize an abstraction layer:
-- **`monitoring.js`**: A centralized wrapper currently set up to capture exceptions and route failures. It contains hooks ready for instant integration with platforms like **Sentry** or **Crashlytics**.
-- **`logger.js`**: A distinct logging utility that separates developer diagnostics from production noise. It filters `info` and `warn` levels in production unless overridden by feature flags.
-- **Health Checks**: A startup diagnostic script (`healthCheck.js`) validates environment variables, `localStorage` availability, and feature flag statuses before rendering the React tree.
+## 🧪 Testing
 
-## 🔄 CI/CD Pipeline
+The codebase includes component unit tests and browser end-to-end tests. All tests currently pass:
 
-Continuous Integration is orchestrated via **GitHub Actions** (`.github/workflows/ci.yml`). Every push and pull request triggers a pipeline that:
-1. Installs dependencies (`npm ci`).
-2. Enforces code quality (`npm run lint`).
-3. Executes the unit test suite (`npm run test -- --run`).
-4. Validates production compilation (`npm run build`).
+```bash
+# Run Vitest unit tests
+npm test -- --run
 
-A failure at any step halts the deployment process, ensuring that only verified, secure code reaches production.
+# Run Playwright E2E tests
+npx playwright test
+```
 
-## 🚀 Operational Readiness Checklist
+---
 
-Before deploying SecureAuth Pro to a live production environment (e.g., Vercel, Netlify, or AWS), ensure the following:
-- [ ] **Environment Variables**: Inject all `VITE_FIREBASE_*` variables into your hosting provider's CI/CD settings.
-- [ ] **Feature Flags**: Toggle `VITE_ENABLE_MONITORING` and `VITE_ENABLE_ANALYTICS` based on your compliance requirements.
-- [ ] **Authorized Domains**: Whitelist your production domain in the Firebase Console (Authentication > Settings > Authorized domains).
-- [ ] **Security Rules**: Deploy strict Firestore/Storage security rules if utilizing backend databases.
+## 🛡️ Security Features
 
-## ⚠️ Known Limitations
+* **Firestore Security Rules**: Explicit rules defining identity isolation and append-only constraints for the `/users/{userId}/audit_logs` collections, preventing log deletion.
+* **Immutable Audit Trail**: Prevent client-side updates and deletes on security logs, preserving auditing integrity.
+* **Trusted Device Evaluation**: Cryptographic fallback protection checking device fingerprints against known identifiers.
+* **Session Normalization**: Production-quality schema normalization validating structure and default options for incoming Firestore session objects.
+* **Cross-Tab Synchronization**: Automated storage events listener checking data values before updating React state, preventing render/write feedback loops.
+* **Storage Hardening**: Exception handlers validating and defaulting local storage fields to prevent crashes from malformed JSON.
+* **Protected Routes**: Custom authentication middleware securing system views from unauthenticated redirects.
 
-- **Rate Limiting**: Firebase Phone Authentication imposes strict rate limits on SMS delivery. During heavy testing, you may encounter `auth/too-many-requests`. It is recommended to use test phone numbers configured in the Firebase Console for automated pipelines.
-- **Session Intelligence Granularity**: The current OS/Device detection relies on `navigator.userAgent` parsing. While effective, it may classify specialized or highly masked browsers generically.
+---
 
-## 📜 License
+## ⚡ Performance Optimizations
 
-Distributed under the MIT License.
+* **Vite HMR**: Lightning-fast hot module replacement.
+* **Code Splitting**: Route-level dynamic imports.
+* **Firestore Pagination**: Queries are explicitly paginated via `.limit()` and `.startAfter()` constraints in the Audit Center.
+* **Optimized Session Loading**: Sessions query is capped via `.limit(50)` and ordered by `lastActivity` desc to avoid database scan overheads.
+* **Centralized Metadata**: All event labels, classes, and icons are mapped inside a single `src/utils/eventMetadata.js` module to optimize bundles and reuse assets.
+
+---
+
+## 🚀 Deployment
+
+The project is configured for one-click deployment using **Firebase Hosting**:
+
+1. Log in to Firebase CLI:
+   ```bash
+   firebase login
+   ```
+
+2. Deploy the application bundle:
+   ```bash
+   firebase deploy
+   ```
+
+Live Host: [https://auth-otp-8693d.web.app](https://auth-otp-8693d.web.app)
+
+---
+
+## 🔮 Future Improvements
+
+* **Cloud Functions**: Migrate audit logging and session termination to backend Cloud Functions.
+* **Server-Side Revocation**: Implement server-side tokens revocation when a session is terminated.
+* **Push Notifications**: Real-time push notifications for remote session registrations.
+* **Device Geolocation**: Extract and display precise geographical details of active sessions.
+* **Admin dashboard**: Multi-tenant admin overview interface to monitor user registrations.
+
+---
+
+## 👤 Author
+
+**Garv Agarwal**
+
+* GitHub: [@garv999](https://github.com/garv999)
+* Email: [garv.agarwal@example.com](mailto:garv.agarwal@example.com)
