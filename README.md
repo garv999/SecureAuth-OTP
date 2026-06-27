@@ -21,7 +21,6 @@ SecureAuth-OTP is a production-ready, enterprise-grade multi-provider identity a
 ## 📋 Table of Contents
 
 - [Features](#features)
-- [Screenshots](#screenshots)
 - [Tech Stack](#tech-stack)
 - [Project Architecture](#project-architecture)
 - [Folder Structure](#folder-structure)
