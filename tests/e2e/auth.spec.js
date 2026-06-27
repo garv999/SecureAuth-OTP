@@ -56,6 +56,7 @@ test.describe('Authentication Flow', () => {
           export const createUserProfile = async () => {};
           export const updateUserProfile = async () => {};
           export const getUserSubcollection = async () => [];
+          export const getUserSessions = async () => [];
           export const addUserSubcollectionDoc = async () => ({ id: 'mock-doc-id' });
           export const setUserDoc = async () => {};
           export const deleteUserDoc = async () => {};

@@ -39,6 +39,22 @@ export const getUserSubcollection = async (uid, collectionName) => {
   return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
+export const getUserSessions = async (uid, limitCount = 50) => {
+  if (!uid) return [];
+  try {
+    const q = query(
+      collection(db, 'users', uid, 'sessions'),
+      orderBy('lastActivity', 'desc'),
+      limit(limitCount)
+    );
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Failed to fetch sessions:", error);
+    return [];
+  }
+};
+
 export const addUserSubcollectionDoc = async (uid, collectionName, data) => {
   return await addDoc(collection(db, 'users', uid, collectionName), {
     ...data,

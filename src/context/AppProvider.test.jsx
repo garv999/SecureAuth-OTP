@@ -5,7 +5,7 @@ import { AppProvider } from './AppProvider';
 import { AppContext } from './AppContext';
 import { useAuth } from '../hooks/useAuth';
 import { getSessionFingerprint } from '../utils/session';
-import { getUserSubcollection, setUserDoc } from '../services/firestore';
+import { getUserSessions, setUserDoc } from '../services/firestore';
 
 // Mock dependencies
 vi.mock('../hooks/useAuth', () => ({
@@ -30,6 +30,7 @@ vi.mock('../utils/session', () => ({
 
 vi.mock('../services/firestore', () => ({
   getUserSubcollection: vi.fn(),
+  getUserSessions: vi.fn(),
   setUserDoc: vi.fn().mockResolvedValue(),
   deleteUserDoc: vi.fn().mockResolvedValue(),
   logAuditEvent: vi.fn().mockResolvedValue()
@@ -85,7 +86,7 @@ describe('AppProvider Tests', () => {
         operatingSystem: 'macOS'
       });
 
-      getUserSubcollection.mockResolvedValue([]);
+      getUserSessions.mockResolvedValue([]);
 
       window.sessionStorage.setItem('sa_current_sid', 'session-active');
 
@@ -153,7 +154,7 @@ describe('AppProvider Tests', () => {
         lastActivity: new Date().toISOString()
       };
       
-      getUserSubcollection.mockResolvedValue([existingSession]);
+      getUserSessions.mockResolvedValue([existingSession]);
 
       window.sessionStorage.removeItem('sa_current_sid');
       window.localStorage.removeItem('sa_sessions');
@@ -189,7 +190,7 @@ describe('AppProvider Tests', () => {
         logout: vi.fn()
       });
 
-      getUserSubcollection.mockResolvedValue([]);
+      getUserSessions.mockResolvedValue([]);
 
       let capturedState;
       render(

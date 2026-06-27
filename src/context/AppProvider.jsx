@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 import { getSessionFingerprint, normalizeSession } from '../utils/session';
 import { INACTIVITY_LIMIT, WARNING_THRESHOLD } from '../constants/session';
 import { AppContext } from './AppContext';
-import { getUserSubcollection, setUserDoc, deleteUserDoc, logAuditEvent } from '../services/firestore';
+import { getUserSessions, setUserDoc, deleteUserDoc, logAuditEvent } from '../services/firestore';
 
 export const AppProvider = ({ children }) => {
   const { user, loading, logout } = useAuth();
@@ -299,7 +299,7 @@ export const AppProvider = ({ children }) => {
   const loadData = useCallback(async () => {
     if (!user) return;
     try {
-      const firestoreSessions = await getUserSubcollection(user.uid, 'sessions');
+      const firestoreSessions = await getUserSessions(user.uid);
       const normalized = (firestoreSessions || []).map(normalizeSession);
       setSessions(normalized);
       setIsDataLoaded(true);
