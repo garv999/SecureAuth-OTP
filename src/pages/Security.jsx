@@ -22,6 +22,7 @@ import {
 import { FcGoogle } from 'react-icons/fc';
 import { useAppContext } from '../hooks/useAppContext';
 import { useAuth } from '../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 import Button from '../components/common/Button';
 import Modal from '../components/Modal';
 import ReauthModal from '../components/auth/ReauthModal';
@@ -31,6 +32,7 @@ import EmptyState from '../components/common/EmptyState';
 import { toast } from 'react-hot-toast';
 
 const Security = () => {
+  const navigate = useNavigate();
   const { 
     sessions, 
     terminateSession, 
@@ -104,7 +106,7 @@ const Security = () => {
       if (reauthAction === 'delete') {
         await deleteAccount();
         addHistoryEvent('account_deleted', 'Account and all associated data removed.');
-        window.location.href = '/login';
+        navigate('/login', { replace: true });
       } else if (reauthAction === 'unlink_google.com') {
         await unlinkProvider('google.com');
         addHistoryEvent('provider_unlinked', 'Google account disconnected.');
@@ -158,7 +160,7 @@ const Security = () => {
         title="No Active Sessions"
         message="Your account has no active sessions. This might happen if you've recently logged out of all devices."
         actionLabel="Back to Dashboard"
-        onAction={() => window.location.href = '/dashboard'}
+        onAction={() => navigate('/dashboard')}
       />
     );
   }
