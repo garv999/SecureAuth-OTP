@@ -91,7 +91,7 @@ const getEventIcon = (type) => {
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { history, analytics, securityScore } = useAppContext();
+  const { analytics, securityScore } = useAppContext();
   const [copied, setCopied] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [recentEvents, setRecentEvents] = useState([]);

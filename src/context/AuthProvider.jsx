@@ -193,7 +193,7 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: 'AUTH_FAILURE', payload: error.message });
       throw error;
     }
-  }, [state.confirmationResult, state.verificationId]);
+  }, [state.confirmationResult, state.verificationId, state.user]);
 
   const loginWithGoogle = useCallback(async () => {
     dispatch({ type: 'AUTH_START' });
