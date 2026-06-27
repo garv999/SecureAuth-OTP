@@ -1,11 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  BsBoxArrowInRight, 
-  BsBoxArrowRight, 
-  BsArrowRepeat, 
-  BsXLg, 
-  BsShieldCheck, 
   BsSearch, 
   BsFilter,
   BsCalendarDate,
@@ -15,6 +10,7 @@ import {
 import { useAppContext } from '../hooks/useAppContext';
 import Button from '../components/common/Button';
 import EmptyState from '../components/common/EmptyState';
+import { getEventLabel, getEventIcon } from '../utils/eventMetadata';
 
 const Activity = () => {
   const { history, clearHistory } = useAppContext();
@@ -43,28 +39,6 @@ const Activity = () => {
       return matchesSearch && matchesType && matchesDate;
     });
   }, [history, searchTerm, filterType, dateFilter]);
-
-  const getIcon = (type) => {
-    switch (type) {
-      case 'login': return <BsBoxArrowInRight className="text-emerald-500" />;
-      case 'logout': return <BsBoxArrowRight className="text-red-500" />;
-      case 'session_restore': return <BsArrowRepeat className="text-blue-500" />;
-      case 'session_expiry': return <BsXLg className="text-amber-500" />;
-      case 'session_extended': return <BsShieldCheck className="text-blue-400" />;
-      default: return <BsArrowRepeat />;
-    }
-  };
-
-  const getLabel = (type) => {
-    switch (type) {
-      case 'login': return 'Logged In';
-      case 'logout': return 'Logged Out';
-      case 'session_restore': return 'Session Restored';
-      case 'session_expiry': return 'Session Expired';
-      case 'session_extended': return 'Session Extended';
-      default: return (type || '').replace(/_/g, ' ').toUpperCase();
-    }
-  };
 
   return (
     <motion.div
@@ -158,11 +132,11 @@ const Activity = () => {
                 className="flex gap-6 relative z-10"
               >
                 <div className="w-11 h-11 bg-[var(--bg-color)] border border-[var(--border-color)] rounded-full flex items-center justify-center text-xl shrink-0">
-                  {getIcon(event.type)}
+                  {getEventIcon(event.type, 'activity')}
                 </div>
                 <div className="flex-1 p-5 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl hover:border-[var(--accent-blue)] transition-all group">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-                    <span className="font-bold text-[var(--text-primary)] text-lg group-hover:text-[var(--accent-blue)] transition-colors">{getLabel(event.type)}</span>
+                    <span className="font-bold text-[var(--text-primary)] text-lg group-hover:text-[var(--accent-blue)] transition-colors">{getEventLabel(event.type, 'activity')}</span>
                     <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest bg-[var(--bg-color)] px-3 py-1 rounded-full border border-[var(--border-color)]">
                       {event?.timestamp ? new Date(event.timestamp).toLocaleString() : 'Unknown Time'}
                     </span>

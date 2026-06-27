@@ -1,49 +1,19 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  BsBoxArrowInRight, 
-  BsBoxArrowRight, 
-  BsArrowRepeat, 
-  BsXLg, 
-  BsShieldCheck, 
-  BsShieldX,
-  BsLink45Deg,
-  BsExclamationTriangleFill,
   BsSearch, 
   BsFilter,
   BsCalendarDate,
   BsClipboard,
   BsClipboardCheck,
-  BsInfoCircle
+  BsXLg
 } from 'react-icons/bs';
 import { useAuth } from '../hooks/useAuth';
 import { getAuditLogs } from '../services/firestore';
 import Button from '../components/common/Button';
 import EmptyState from '../components/common/EmptyState';
 import { toast } from 'react-hot-toast';
-
-const EVENT_TYPE_LABELS = {
-  login: 'Login',
-  logout: 'Logout',
-  phone_login: 'Phone Login',
-  google_login: 'Google Login',
-  session_restore: 'Session Restored',
-  session_expiry: 'Session Expired',
-  session_created: 'Session Created',
-  session_terminated: 'Session Terminated',
-  provider_linked: 'Provider Linked',
-  provider_unlinked: 'Provider Unlinked',
-  account_merge: 'Account Merged',
-  trusted_device_added: 'Trusted Device Added',
-  trusted_device_removed: 'Trusted Device Removed',
-  security_alert: 'Security Alert'
-};
-
-const RISK_BADGES = {
-  LOW: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-  MEDIUM: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-  HIGH: 'bg-red-500/10 text-red-500 border-red-500/20'
-};
+import { getEventLabel, getEventIcon, getRiskBadgeClass, EVENT_TYPE_LABELS } from '../utils/eventMetadata';
 
 const AuditCenter = () => {
   const { user } = useAuth();
@@ -121,7 +91,7 @@ const AuditCenter = () => {
     return logs.filter(log => {
       // 1. Search term match
       const searchLower = searchTerm.toLowerCase();
-      const eventName = (EVENT_TYPE_LABELS[log.eventType] || log.eventType || '').toLowerCase();
+      const eventName = (getEventLabel(log.eventType) || '').toLowerCase();
       const matchesSearch = 
         eventName.includes(searchLower) ||
         (log.device || '').toLowerCase().includes(searchLower) ||
@@ -165,37 +135,7 @@ const AuditCenter = () => {
     });
   }, [logs, searchTerm, filterType, filterRisk, filterDevice, dateRangeOption, startDate, endDate, now]);
 
-  const getEventIcon = (type) => {
-    switch (type) {
-      case 'login':
-      case 'phone_login':
-      case 'google_login':
-        return <BsBoxArrowInRight className="text-emerald-500" />;
-      case 'logout':
-      case 'session_expiry':
-        return <BsBoxArrowRight className="text-amber-500" />;
-      case 'session_restore':
-        return <BsArrowRepeat className="text-blue-500" />;
-      case 'session_created':
-        return <BsShieldCheck className="text-blue-400" />;
-      case 'session_terminated':
-        return <BsXLg className="text-red-500" />;
-      case 'provider_linked':
-        return <BsShieldCheck className="text-emerald-500" />;
-      case 'provider_unlinked':
-        return <BsShieldX className="text-red-400" />;
-      case 'account_merge':
-        return <BsLink45Deg className="text-purple-500" />;
-      case 'trusted_device_added':
-        return <BsShieldCheck className="text-teal-400" />;
-      case 'trusted_device_removed':
-        return <BsShieldX className="text-rose-500" />;
-      case 'security_alert':
-        return <BsExclamationTriangleFill className="text-red-500 animate-pulse" />;
-      default:
-        return <BsInfoCircle className="text-slate-400" />;
-    }
-  };
+
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
@@ -373,9 +313,9 @@ const AuditCenter = () => {
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-bold text-[var(--text-primary)] text-sm md:text-base group-hover:text-blue-500 transition-colors">
-                          {EVENT_TYPE_LABELS[log.eventType] || log.eventType}
+                          {getEventLabel(log.eventType)}
                         </span>
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${RISK_BADGES[log.riskLevel || 'LOW']}`}>
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${getRiskBadgeClass(log.riskLevel)}`}>
                           {log.riskLevel || 'LOW'}
                         </span>
                       </div>
@@ -461,14 +401,14 @@ const AuditCenter = () => {
                     </div>
                     <div>
                       <h3 className="font-bold text-[var(--text-primary)] text-sm md:text-base">
-                        {EVENT_TYPE_LABELS[selectedEvent.eventType] || selectedEvent.eventType}
+                        {getEventLabel(selectedEvent.eventType)}
                       </h3>
                       <p className="text-xs text-[var(--text-muted)] font-semibold mt-1">
                         {new Date(selectedEvent.timestamp).toLocaleString()}
                       </p>
                     </div>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold border ${RISK_BADGES[selectedEvent.riskLevel || 'LOW']}`}>
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getRiskBadgeClass(selectedEvent.riskLevel)}`}>
                     {selectedEvent.riskLevel || 'LOW'}
                   </span>
                 </div>

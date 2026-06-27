@@ -15,15 +15,7 @@ import {
   BsArrowUpRight,
   BsArrowDownRight,
   BsDash,
-  BsArrowRight,
-  BsBoxArrowInRight,
-  BsBoxArrowRight,
-  BsArrowRepeat,
-  BsXLg,
-  BsShieldX,
-  BsLink45Deg,
-  BsExclamationTriangleFill,
-  BsInfoCircle
+  BsArrowRight
 } from 'react-icons/bs';
 import { FcGoogle } from 'react-icons/fc';
 import { toast } from 'react-hot-toast';
@@ -32,61 +24,7 @@ import { useAppContext } from '../hooks/useAppContext';
 import { getAuditLogs } from '../services/firestore';
 import Button from '../components/common/Button';
 import EmptyState from '../components/common/EmptyState';
-
-const EVENT_TYPE_LABELS = {
-  login: 'Login',
-  logout: 'Logout',
-  phone_login: 'Phone Login',
-  google_login: 'Google Login',
-  session_restore: 'Session Restored',
-  session_expiry: 'Session Expired',
-  session_created: 'Session Created',
-  session_terminated: 'Session Terminated',
-  provider_linked: 'Provider Linked',
-  provider_unlinked: 'Provider Unlinked',
-  account_merge: 'Account Merged',
-  trusted_device_added: 'Trusted Device Added',
-  trusted_device_removed: 'Trusted Device Removed',
-  security_alert: 'Security Alert'
-};
-
-const RISK_BADGES = {
-  LOW: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-  MEDIUM: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-  HIGH: 'bg-red-500/10 text-red-500 border-red-500/20'
-};
-
-const getEventIcon = (type) => {
-  switch (type) {
-    case 'login':
-    case 'phone_login':
-    case 'google_login':
-      return <BsBoxArrowInRight className="text-emerald-500" />;
-    case 'logout':
-    case 'session_expiry':
-      return <BsBoxArrowRight className="text-amber-500" />;
-    case 'session_restore':
-      return <BsArrowRepeat className="text-blue-500" />;
-    case 'session_created':
-      return <BsShieldCheck className="text-blue-400" />;
-    case 'session_terminated':
-      return <BsXLg className="text-red-500" />;
-    case 'provider_linked':
-      return <BsShieldCheck className="text-emerald-500" />;
-    case 'provider_unlinked':
-      return <BsShieldX className="text-red-400" />;
-    case 'account_merge':
-      return <BsLink45Deg className="text-purple-500" />;
-    case 'trusted_device_added':
-      return <BsShieldCheck className="text-teal-400" />;
-    case 'trusted_device_removed':
-      return <BsShieldX className="text-rose-500" />;
-    case 'security_alert':
-      return <BsExclamationTriangleFill className="text-red-500 animate-pulse" />;
-    default:
-      return <BsInfoCircle className="text-slate-400" />;
-  }
-};
+import { getEventLabel, getEventIcon, getRiskBadgeClass } from '../utils/eventMetadata';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -337,9 +275,9 @@ const Dashboard = () => {
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-bold text-[var(--text-primary)]">
-                        {EVENT_TYPE_LABELS[event.eventType] || event.eventType}
+                        {getEventLabel(event.eventType)}
                       </span>
-                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${RISK_BADGES[event.riskLevel]}`}>
+                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${getRiskBadgeClass(event.riskLevel)}`}>
                         {event.riskLevel}
                       </span>
                     </div>
