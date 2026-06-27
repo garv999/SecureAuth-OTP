@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper to check if request is authenticated and matches target user
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    match /users/{userId} {
+      // Allow reading, creating, and updating profile data for owner
+      allow read, create, update: if isOwner(userId);
+      // Disable direct profile deletion from client
+      allow delete: if false;
+
+      match /sessions/{sessionId} {
+        // Allow full read/write access to sessions for owner
+        allow read, write: if isOwner(userId);
+      }
+
+      match /audit_logs/{logId} {
+        // Audit logs are append-only. Users can read and write logs, but never update or delete them.
+        allow read, create: if isOwner(userId);
+        allow update, delete: if false;
+      }
+    }
+  }
+}
