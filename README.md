@@ -56,22 +56,22 @@ SecureAuth-OTP is a production-ready, enterprise-grade multi-provider identity a
 Below are placeholders for the visual interface layouts of the project:
 
 ### 1. Login Page
-![Login Page](docs/images/login.png)
+![Login Page](Screenshots/login_page.png)
 
 ### 2. Dashboard Overview
-![Dashboard](docs/images/dashboard.png)
+![Dashboard](Screenshots/Dashboard.png)
 
 ### 3. Security Page
-![Security Page](docs/images/security.png)
+![Security Page](Screenshots/Security.png)
 
 ### 4. Activity Timeline
-![Activity Page](docs/images/activity.png)
+![Activity Page](Screenshots/Activity_page.png)
 
 ### 5. Audit Center
-![Audit Center](docs/images/audit.png)
+![Audit Center](Screenshots/audit_center.png)
 
 ### 6. Settings Page
-![Settings](docs/images/settings.png)
+![Settings](Screenshots/settings.png)
 
 ---
 
@@ -114,7 +114,9 @@ Below are placeholders for the visual interface layouts of the project:
 
 ```
 src/
+├── assets/              # Static assets, styling tokens, and raw media
 ├── components/          # Reusable UI components (Buttons, Modals, Layout)
+├── config/              # Application environment config files
 ├── constants/           # Global app configurations and thresholds
 ├── context/             # Global Context providers (AuthProvider, AppProvider)
 ├── hooks/               # Custom hooks (useAuth, useAppContext)
@@ -236,5 +238,4 @@ Live Host: [https://auth-otp-8693d.web.app](https://auth-otp-8693d.web.app)
 
 **Garv Agarwal**
 
-* GitHub: [@garv999](https://github.com/garv999)
-* Email: [garv.agarwal@example.com](mailto:garv.agarwal@example.com)
+* GitHub: [Garv999](https://github.com/garv999)
