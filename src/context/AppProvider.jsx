@@ -405,6 +405,56 @@ export const AppProvider = ({ children }) => {
       clearInterval(interval);
     };
   }, [user, currentSessionId, showSessionWarning, logout, addHistoryEvent]);
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'sa_theme') {
+        if (theme !== e.newValue) {
+          setTheme(e.newValue || 'dark');
+        }
+        return;
+      }
+
+      if (!e.newValue) {
+        if (e.key === 'sa_history' && history.length > 0) {
+          setHistory([]);
+        } else if (e.key === 'sa_trusted_devices' && trustedDevices.length > 0) {
+          setTrustedDevices([]);
+        } else if (e.key === 'sa_sessions' && sessions !== null) {
+          setSessions([]);
+        }
+        return;
+      }
+
+      try {
+        const parsed = JSON.parse(e.newValue);
+        if (e.key === 'sa_settings') {
+          if (JSON.stringify(settings) !== e.newValue) {
+            setSettings(parsed);
+          }
+        } else if (e.key === 'sa_trusted_devices') {
+          if (JSON.stringify(trustedDevices) !== e.newValue) {
+            setTrustedDevices(Array.isArray(parsed) ? parsed : []);
+          }
+        } else if (e.key === 'sa_history') {
+          if (JSON.stringify(history) !== e.newValue) {
+            setHistory(Array.isArray(parsed) ? parsed : []);
+          }
+        } else if (e.key === 'sa_sessions') {
+          if (JSON.stringify(sessions) !== e.newValue) {
+            setSessions(Array.isArray(parsed) ? parsed : []);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to parse storage sync event for key:", e.key, err);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [theme, settings, trustedDevices, history, sessions]);
+
 
   useEffect(() => {
     document.body.setAttribute('data-theme', theme);
